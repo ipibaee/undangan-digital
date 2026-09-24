@@ -43,7 +43,7 @@ export const AdminAuth = ({ onAuthenticated, onCancel }) => {
               type="password"
               autoFocus
               maxLength={8}
-              placeholder="Masukkan PIN (Default: 292003)"
+              placeholder="Masukkan PIN Keamanan"
               value={pin}
               onChange={(e) => {
                 setPin(e.target.value);
@@ -55,9 +55,10 @@ export const AdminAuth = ({ onAuthenticated, onCancel }) => {
 
           {error && (
             <p className="text-xs text-rose-400 font-medium">
-              PIN salah! Silakan coba lagi (PIN bawaan: 292003)
+              PIN salah. Silakan coba lagi.
             </p>
           )}
+
 
 
           <button

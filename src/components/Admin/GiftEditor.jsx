@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { useInvitation } from '../../context/InvitationContext';
-import { Gift, CreditCard, Plus, Trash2, MapPin } from 'lucide-react';
+import { Gift, CreditCard, Plus, Trash2, MapPin, QrCode } from 'lucide-react';
+import { ImageUploadInput } from '../common/ImageUploadInput';
 
 export const GiftEditor = () => {
   const { data, updateField } = useInvitation();
   const gifts = data.gifts || {};
   const accounts = gifts.accounts || [];
+  const qris = gifts.qris || {};
+
 
   const [newAcc, setNewAcc] = useState({ bankName: 'BCA', accountNumber: '', accountHolder: '' });
 
@@ -146,8 +149,83 @@ export const GiftEditor = () => {
         </form>
       </div>
 
+      {/* QRIS Settings Section */}
+      <div className="p-6 rounded-2xl bg-stone-800 border border-stone-700 space-y-4 text-xs">
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-sm text-white flex items-center gap-2">
+            <QrCode className="w-4 h-4 text-amber-500" />
+            <span>Pengaturan QRIS Pembayaran / Amplop Digital</span>
+          </h3>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={qris.enabled !== false}
+              onChange={(e) => updateField('gifts.qris.enabled', e.target.checked)}
+              className="rounded bg-stone-900 border-stone-700 text-amber-600 focus:ring-0"
+            />
+            <span className="font-semibold text-stone-300">Tampilkan QRIS di Undangan</span>
+          </label>
+        </div>
+
+        <p className="text-stone-400">
+          Upload foto kode QRIS Anda agar para tamu dapat mengirimkan amplop digital via scan dari semua m-Banking dan e-Wallet (BCA, Mandiri, BRI, BNI, GoPay, OVO, DANA, ShopeePay).
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <ImageUploadInput
+            label="Upload Foto Barcode QRIS"
+            value={qris.image || ''}
+            onChange={(val) => updateField('gifts.qris.image', val)}
+            previewAspect="aspect-square"
+            maxWidth={800}
+          />
+
+          <div className="space-y-3 flex flex-col justify-between">
+            <div>
+              <label className="block text-stone-300 mb-1 font-semibold uppercase tracking-wider">
+                Judul QRIS
+              </label>
+              <input
+                type="text"
+                value={qris.title || ''}
+                onChange={(e) => updateField('gifts.qris.title', e.target.value)}
+                placeholder="Contoh: QRIS Amplop Digital"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-stone-300 mb-1 font-semibold uppercase tracking-wider">
+                Atas Nama Pemilik QRIS
+              </label>
+              <input
+                type="text"
+                value={qris.holderName || ''}
+                onChange={(e) => updateField('gifts.qris.holderName', e.target.value)}
+                placeholder="Contoh: Justin & Sisca"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-stone-300 mb-1 font-semibold uppercase tracking-wider">
+                Petunjuk Scan / Keterangan
+              </label>
+              <textarea
+                rows={2}
+                value={qris.notes || ''}
+                onChange={(e) => updateField('gifts.qris.notes', e.target.value)}
+                placeholder="Contoh: Scan menggunakan BCA, Mandiri, BRI, BNI, GoPay, OVO, DANA, ShopeePay..."
+                className="w-full p-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Physical Gift Delivery Address */}
       <div className="p-6 rounded-2xl bg-stone-800 border border-stone-700 space-y-4 text-xs">
+
         <h3 className="font-bold text-sm text-white flex items-center gap-2">
           <MapPin className="w-4 h-4 text-amber-500" />
           <span>Alamat Pengiriman Kado Fisik</span>

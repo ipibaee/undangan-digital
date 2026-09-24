@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useInvitation } from '../../context/InvitationContext';
-import { Gift, CreditCard, Copy, Check, MapPin } from 'lucide-react';
+import { Gift, CreditCard, Copy, Check, MapPin, QrCode, ExternalLink } from 'lucide-react';
 import { FloralBadge } from './Ornaments';
 
 export const GiftSection = () => {
@@ -15,6 +15,7 @@ export const GiftSection = () => {
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2500);
   };
+
 
   return (
     <section id="gift" className="relative py-16 sm:py-24 px-4 overflow-hidden">
@@ -77,7 +78,54 @@ export const GiftSection = () => {
           ))}
         </div>
 
+        {/* QRIS Amplop Digital */}
+        {gifts.qris?.enabled !== false && gifts.qris?.image && (
+          <div className={`p-6 sm:p-8 rounded-3xl ${currentTheme.cardBg} text-center space-y-4 shadow-sm`}>
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200">
+                <QrCode className="w-3.5 h-3.5 text-rose-600" />
+                <span>{gifts.qris.title || 'QRIS Amplop Digital'}</span>
+              </div>
+              {gifts.qris.holderName && (
+                <h4 className="font-bold text-sm text-stone-800 pt-1">
+                  a.n. {gifts.qris.holderName}
+                </h4>
+              )}
+            </div>
+
+            {/* QRIS Image Container */}
+            <div className="p-3 bg-white rounded-2xl shadow-inner border border-stone-200 inline-block mx-auto max-w-[220px]">
+              <img
+                src={gifts.qris.image}
+                alt="QRIS Pembayaran"
+                className="w-full h-auto object-contain rounded-xl cursor-pointer hover:scale-[1.02] transition-transform"
+                onClick={() => window.open(gifts.qris.image, '_blank')}
+                title="Klik untuk memperbesar gambar QRIS"
+              />
+            </div>
+
+            {gifts.qris.notes && (
+              <p className="text-xs text-stone-500 max-w-sm mx-auto leading-relaxed">
+                {gifts.qris.notes}
+              </p>
+            )}
+
+            <div>
+              <a
+                href={gifts.qris.image}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold ${currentTheme.secondaryBtn}`}
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Buka / Unduh Gambar QRIS</span>
+              </a>
+            </div>
+          </div>
+        )}
+
         {/* Physical Gift Delivery Address */}
+
         {gifts.physicalGift?.address && (
           <div className={`p-6 sm:p-8 rounded-3xl ${currentTheme.cardBg} space-y-4 shadow-sm`}>
             <div className="flex items-center gap-2.5">

@@ -167,6 +167,13 @@ export const initialInvitationData = {
         logo: "E-WALLET"
       }
     ],
+    qris: {
+      enabled: true,
+      title: "QRIS Amplop Digital",
+      holderName: "Justin & Sisca",
+      image: "",
+      notes: "Scan menggunakan BCA, Mandiri, BRI, BNI, GoPay, OVO, DANA, ShopeePay, LinkAja, atau aplikasi m-Banking apapun."
+    },
     physicalGift: {
       recipientName: "Justin & Sisca",
       phone: "0812-3456-7890",
@@ -174,6 +181,7 @@ export const initialInvitationData = {
       notes: "Mohon konfirmasi ke nomor di atas sebelum mengirim paket kado."
     }
   },
+
 
   // Musik Latar
   music: {
