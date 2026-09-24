@@ -2,6 +2,28 @@ import React from 'react';
 import { useInvitation } from '../../context/InvitationContext';
 import { Calendar, Clock, MapPin, Navigation } from 'lucide-react';
 
+const cleanEmbedInput = (input) => {
+  if (!input) return '';
+  const trimmed = input.trim();
+  // If user pasted iframe HTML tag like <iframe src="https://..." ...>
+  const iframeMatch = trimmed.match(/src=["']([^"']+)["']/i);
+  if (iframeMatch) {
+    return iframeMatch[1];
+  }
+  // If user pasted google maps link with coordinates @-7.4984461,109.5332662
+  const coordMatch = trimmed.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (coordMatch) {
+    return `https://maps.google.com/maps?q=${coordMatch[1]},${coordMatch[2]}&hl=id&z=17&output=embed`;
+  }
+  return trimmed;
+};
+
+const generateEmbedFromAddress = (address, venueName) => {
+  const query = [venueName, address].filter(Boolean).join(', ');
+  if (!query) return '';
+  return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&hl=id&z=16&output=embed`;
+};
+
 export const EventEditor = () => {
   const { data, updateField } = useInvitation();
   const { targetDate, akad, resepsi } = data.events;
@@ -117,15 +139,32 @@ export const EventEditor = () => {
           </div>
 
           <div>
-            <label className="block text-stone-300 mb-1 font-semibold uppercase tracking-wider">
-              Google Maps Embed URL (Iframe)
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-stone-300 font-semibold uppercase tracking-wider">
+                Google Maps Embed URL (Iframe)
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  const url = generateEmbedFromAddress(akad.address, akad.venueName);
+                  if (url) updateField('events.akad.mapsEmbed', url);
+                }}
+                className="text-[11px] text-amber-400 hover:text-amber-300 font-medium underline flex items-center gap-1 cursor-pointer"
+                title="Otomatis buat embed dari Alamat dan Nama Gedung"
+              >
+                <span>✨ Buat Otomatis dari Alamat</span>
+              </button>
+            </div>
             <input
               type="text"
               value={akad.mapsEmbed}
-              onChange={(e) => updateField('events.akad.mapsEmbed', e.target.value)}
+              onChange={(e) => updateField('events.akad.mapsEmbed', cleanEmbedInput(e.target.value))}
+              placeholder="https://maps.google.com/maps?q=...&output=embed"
               className="w-full px-3.5 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono text-[11px]"
             />
+            <p className="text-[10px] text-stone-400 mt-1 leading-normal">
+              💡 <strong>Tips:</strong> Klik <em>"✨ Buat Otomatis dari Alamat"</em> di atas agar peta otomatis mengarah ke alamat Anda, atau tempelkan link sematan dari Google Maps.
+            </p>
           </div>
         </div>
 
@@ -211,15 +250,32 @@ export const EventEditor = () => {
           </div>
 
           <div>
-            <label className="block text-stone-300 mb-1 font-semibold uppercase tracking-wider">
-              Google Maps Embed URL (Iframe)
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-stone-300 font-semibold uppercase tracking-wider">
+                Google Maps Embed URL (Iframe)
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  const url = generateEmbedFromAddress(resepsi.address, resepsi.venueName);
+                  if (url) updateField('events.resepsi.mapsEmbed', url);
+                }}
+                className="text-[11px] text-amber-400 hover:text-amber-300 font-medium underline flex items-center gap-1 cursor-pointer"
+                title="Otomatis buat embed dari Alamat dan Nama Gedung"
+              >
+                <span>✨ Buat Otomatis dari Alamat</span>
+              </button>
+            </div>
             <input
               type="text"
               value={resepsi.mapsEmbed}
-              onChange={(e) => updateField('events.resepsi.mapsEmbed', e.target.value)}
+              onChange={(e) => updateField('events.resepsi.mapsEmbed', cleanEmbedInput(e.target.value))}
+              placeholder="https://maps.google.com/maps?q=...&output=embed"
               className="w-full px-3.5 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono text-[11px]"
             />
+            <p className="text-[10px] text-stone-400 mt-1 leading-normal">
+              💡 <strong>Tips:</strong> Klik <em>"✨ Buat Otomatis dari Alamat"</em> di atas agar peta otomatis mengarah ke alamat Anda, atau tempelkan link sematan dari Google Maps.
+            </p>
           </div>
         </div>
 

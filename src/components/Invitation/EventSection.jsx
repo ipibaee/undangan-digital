@@ -3,9 +3,48 @@ import { useInvitation } from '../../context/InvitationContext';
 import { MapPin, Calendar, Clock, Navigation } from 'lucide-react';
 import { FloralBadge, SectionDivider } from './Ornaments';
 
+const resolveMapEmbed = (embedUrl, address, venueName, mapsUrl) => {
+  if (embedUrl && typeof embedUrl === 'string') {
+    const iframeMatch = embedUrl.match(/src=["']([^"']+)["']/i);
+    if (iframeMatch) {
+      return iframeMatch[1];
+    }
+  }
+
+  // Check if it's the old default Jakarta template coordinates (106.759478 / -6.2297465)
+  // while current address has been changed to something outside Jakarta
+  const isDefaultJakartaEmbed = embedUrl && embedUrl.includes('106.759478') && embedUrl.includes('-6.2297465');
+  const hasCustomAddress = address && !address.toLowerCase().includes('jakarta') && !address.toLowerCase().includes('kebayoran');
+
+  if (isDefaultJakartaEmbed && hasCustomAddress) {
+    const query = [venueName, address].filter(Boolean).join(', ');
+    return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&hl=id&z=16&output=embed`;
+  }
+
+  if (embedUrl && embedUrl.trim()) {
+    // If user mistakenly put a non-embed URL like maps.app.goo.gl
+    if (embedUrl.includes('goo.gl') || !embedUrl.includes('embed')) {
+      const query = [venueName, address].filter(Boolean).join(', ');
+      return `https://maps.google.com/maps?q=${encodeURIComponent(query || 'Lokasi Acara')}&hl=id&z=16&output=embed`;
+    }
+    return embedUrl;
+  }
+
+  // Fallback if no embedUrl but address exists
+  if (address || venueName) {
+    const query = [venueName, address].filter(Boolean).join(', ');
+    return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&hl=id&z=16&output=embed`;
+  }
+
+  return '';
+};
+
 export const EventSection = () => {
   const { data, currentTheme } = useInvitation();
   const { akad, resepsi } = data.events;
+
+  const akadEmbed = resolveMapEmbed(akad.mapsEmbed, akad.address, akad.venueName, akad.mapsUrl);
+  const resepsiEmbed = resolveMapEmbed(resepsi.mapsEmbed, resepsi.address, resepsi.venueName, resepsi.mapsUrl);
 
   return (
     <section id="event" className="relative py-16 sm:py-24 px-4 overflow-hidden">
@@ -68,11 +107,11 @@ export const EventSection = () => {
             )}
 
             {/* Embedded Map */}
-            {akad.mapsEmbed && (
+            {akadEmbed && (
               <div className="w-full h-48 sm:h-56 rounded-2xl overflow-hidden border border-stone-200 shadow-inner">
                 <iframe
                   title="Peta Lokasi Akad"
-                  src={akad.mapsEmbed}
+                  src={akadEmbed}
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -127,11 +166,11 @@ export const EventSection = () => {
             )}
 
             {/* Embedded Map */}
-            {resepsi.mapsEmbed && (
+            {resepsiEmbed && (
               <div className="w-full h-48 sm:h-56 rounded-2xl overflow-hidden border border-stone-200 shadow-inner">
                 <iframe
                   title="Peta Lokasi Resepsi"
-                  src={resepsi.mapsEmbed}
+                  src={resepsiEmbed}
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
