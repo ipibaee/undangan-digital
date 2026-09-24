@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useInvitation } from '../../context/InvitationContext';
 import { 
   Users, Calendar, BookHeart, Gift, Palette, MessageSquare, 
-  Settings, ExternalLink, ArrowLeft, Shield, Sparkles, Check 
+  Settings, ExternalLink, ArrowLeft, Shield, Sparkles, Check,
+  CloudUpload, CheckCircle2, RefreshCw
 } from 'lucide-react';
 import { GuestBookManager } from './GuestBookManager';
 import { CoupleEditor } from './CoupleEditor';
@@ -14,8 +15,19 @@ import { WishesModerator } from './WishesModerator';
 import { BackupSettings } from './BackupSettings';
 
 export const AdminPanel = ({ onExitAdmin }) => {
-  const { data } = useInvitation();
+  const { data, dbStatus, saveToCloudNow, isSavingCloud, lastSavedCloud } = useInvitation();
   const [activeTab, setActiveTab] = useState('buku-tamu');
+  const [saveToast, setSaveToast] = useState(null);
+
+  const handleManualSave = async () => {
+    const res = await saveToCloudNow();
+    if (res.success) {
+      setSaveToast('Tersimpan di Cloud!');
+      setTimeout(() => setSaveToast(null), 3500);
+    } else {
+      alert('Gagal menyimpan ke cloud: ' + (res.message || 'Cek koneksi internet'));
+    }
+  };
 
   const unrepliedCount = (data.wishes || []).filter(w => !w.reply).length;
 
@@ -43,20 +55,49 @@ export const AdminPanel = ({ onExitAdmin }) => {
           <div>
             <h1 className="text-sm sm:text-base font-bold text-white flex items-center gap-1.5 font-serif-heading">
               <span>Panel Pengelola</span>
-              <span className="text-xs text-amber-400 font-normal">({data.couple.groom.nickName} & {data.couple.bride.nickName})</span>
+              <span className="text-xs text-amber-400 font-normal">({data.couple?.groom?.nickName} & {data.couple?.bride?.nickName})</span>
             </h1>
-            <p className="text-[11px] text-stone-400 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span>Semua perubahan langsung tersimpan otomatis</span>
+            <p className="text-[11px] text-stone-400 flex items-center gap-1.5">
+              <span className={`w-2 h-2 rounded-full ${dbStatus.connected ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+              <span>{dbStatus.connected ? 'Terhubung Database Cloud (Neon)' : 'Penyimpanan Lokal'}</span>
+              {lastSavedCloud && <span className="text-emerald-400 font-mono text-[10px]">• Tersimpan {lastSavedCloud}</span>}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Cloud Save Button */}
+          <button
+            type="button"
+            onClick={handleManualSave}
+            disabled={isSavingCloud}
+            className={`px-3.5 py-2 rounded-xl text-white font-semibold text-xs tracking-wide flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer ${
+              saveToast ? 'bg-emerald-600' : 'bg-emerald-700 hover:bg-emerald-600'
+            }`}
+            title="Simpan data ke server cloud Neon agar langsung tampil di HP dan semua tamu"
+          >
+            {isSavingCloud ? (
+              <>
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                <span>Menyimpan...</span>
+              </>
+            ) : saveToast ? (
+              <>
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-200" />
+                <span>{saveToast}</span>
+              </>
+            ) : (
+              <>
+                <CloudUpload className="w-3.5 h-3.5 text-emerald-300" />
+                <span>Simpan ke Cloud (HP)</span>
+              </>
+            )}
+          </button>
+
           {/* Back to Invitation preview */}
           <button
             onClick={onExitAdmin}
-            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs tracking-wide flex items-center gap-1.5 transition-all shadow-md active:scale-95"
+            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs tracking-wide flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
           >
             <ExternalLink className="w-4 h-4" />
             <span>Lihat Undangan</span>

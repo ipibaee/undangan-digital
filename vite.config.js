@@ -8,5 +8,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://undangan-ipiseli.vercel.app',
+        changeOrigin: true,
+      }
+    }
+  }
 })
 

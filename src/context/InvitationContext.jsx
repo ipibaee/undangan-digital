@@ -10,6 +10,14 @@ const STORAGE_KEY = 'undangan_digital_data_v1';
 
 const InvitationContext = createContext(null);
 
+const isTemplateData = (d) => {
+  if (!d || !d.couple) return true;
+  const isDefaultGroom = d.couple?.groom?.fullName === "Justin Pratama, S.Kom." && d.couple?.groom?.nickName === "Justin";
+  const isDefaultBride = d.couple?.bride?.fullName === "Fransisca Anggraini, S.E." && d.couple?.bride?.nickName === "Sisca";
+  const isDefaultAddress = d.events?.akad?.address?.includes("Kebayoran Baru");
+  return Boolean(isDefaultGroom && isDefaultBride && isDefaultAddress);
+};
+
 export const InvitationProvider = ({ children }) => {
   // Load initial data from localStorage if exists
   const [data, setData] = useState(() => {
@@ -26,6 +34,8 @@ export const InvitationProvider = ({ children }) => {
 
   // Database status (Neon Tech Serverless Postgres)
   const [dbStatus, setDbStatus] = useState({ connected: false, provider: 'checking' });
+  const [isSavingCloud, setIsSavingCloud] = useState(false);
+  const [lastSavedCloud, setLastSavedCloud] = useState(null);
 
   // Invitation open state (splash screen passed)
   const [isOpen, setIsOpen] = useState(false);
@@ -36,6 +46,29 @@ export const InvitationProvider = ({ children }) => {
 
   // Guest name extracted from URL query (?kpd=... or ?to=...)
   const [guestName, setGuestName] = useState('Tamu Undangan');
+
+  // Manual or on-demand push to Neon cloud
+  const saveToCloudNow = async (explicitData) => {
+    const payload = explicitData || data;
+    setIsSavingCloud(true);
+    try {
+      const ok = await saveRemoteData(payload);
+      if (ok) {
+        const timeStr = new Date().toLocaleTimeString('id-ID');
+        setLastSavedCloud(timeStr);
+        setDbStatus(prev => ({ ...prev, connected: true }));
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        } catch (e) {}
+        return { success: true, time: timeStr };
+      }
+      return { success: false, message: 'Server database gagal menyimpan' };
+    } catch (err) {
+      return { success: false, message: err.message };
+    } finally {
+      setIsSavingCloud(false);
+    }
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -52,7 +85,23 @@ export const InvitationProvider = ({ children }) => {
         if (status.connected) {
           const remoteData = await fetchRemoteData();
           if (remoteData && remoteData.couple) {
-            setData(remoteData);
+            // Check if local data has user customization while remote is still template
+            const localIsCustom = !isTemplateData(data);
+            const remoteIsTemplate = isTemplateData(remoteData);
+
+            if (localIsCustom && remoteIsTemplate) {
+              // Local is newer/customized! Push local edits to cloud
+              await saveRemoteData(data);
+              setLastSavedCloud(new Date().toLocaleTimeString('id-ID'));
+            } else {
+              // Remote has customized data, sync to local
+              setData(remoteData);
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(remoteData));
+            }
+          } else if (data && !isTemplateData(data)) {
+            // Remote has no data yet, push local to cloud
+            await saveRemoteData(data);
+            setLastSavedCloud(new Date().toLocaleTimeString('id-ID'));
           }
         }
       } catch (err) {
@@ -68,7 +117,9 @@ export const InvitationProvider = ({ children }) => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       if (dbStatus.connected) {
         const timer = setTimeout(() => {
-          saveRemoteData(data);
+          saveRemoteData(data).then(ok => {
+            if (ok) setLastSavedCloud(new Date().toLocaleTimeString('id-ID'));
+          });
         }, 1500);
         return () => clearTimeout(timer);
       }
@@ -351,6 +402,9 @@ export const InvitationProvider = ({ children }) => {
         addWish,
         replyWish,
         deleteWish,
+        saveToCloudNow,
+        isSavingCloud,
+        lastSavedCloud,
       }}
     >
       {children}

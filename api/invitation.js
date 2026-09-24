@@ -33,12 +33,21 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const payload = req.body;
+      let payload = req.body;
+      if (typeof payload === 'string') {
+        try {
+          payload = JSON.parse(payload);
+        } catch (e) {
+          return res.status(400).json({ error: 'Format JSON tidak valid' });
+        }
+      }
+
+      const jsonString = JSON.stringify(payload);
       await sql`
         INSERT INTO invitation_settings (id, data, updated_at)
-        VALUES ('main', ${JSON.stringify(payload)}, CURRENT_TIMESTAMP)
+        VALUES ('main', ${jsonString}, CURRENT_TIMESTAMP)
         ON CONFLICT (id) DO UPDATE
-        SET data = ${JSON.stringify(payload)}, updated_at = CURRENT_TIMESTAMP
+        SET data = ${jsonString}, updated_at = CURRENT_TIMESTAMP
       `;
       return res.status(200).json({ success: true, message: 'Data berhasil disimpan di Neon Tech PostgreSQL!' });
     }

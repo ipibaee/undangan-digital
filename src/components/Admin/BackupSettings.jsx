@@ -1,13 +1,25 @@
 import React, { useState } from 'react';
 import { useInvitation } from '../../context/InvitationContext';
-import { Shield, Download, Upload, RotateCcw, Key, AlertTriangle } from 'lucide-react';
+import { Shield, Download, Upload, RotateCcw, Key, AlertTriangle, CloudUpload, CheckCircle2, RefreshCw } from 'lucide-react';
 
 export const BackupSettings = () => {
-  const { data, updateField, exportDataJson, importDataJson, resetData, dbStatus = { connected: false } } = useInvitation();
+  const { 
+    data, updateField, exportDataJson, importDataJson, resetData, 
+    dbStatus = { connected: false }, saveToCloudNow, isSavingCloud, lastSavedCloud 
+  } = useInvitation();
   const [newPin, setNewPin] = useState(data.meta.adminPin === '1234' ? '292003' : (data.meta.adminPin || '292003'));
-
-
   const [pinSaved, setPinSaved] = useState(false);
+  const [cloudSyncMsg, setCloudSyncMsg] = useState(null);
+
+  const handleManualSync = async () => {
+    setCloudSyncMsg(null);
+    const res = await saveToCloudNow();
+    if (res.success) {
+      setCloudSyncMsg('✅ Berhasil disinkronkan ke Database Cloud Neon! Tampilan di HP & semua tamu sudah terupdate.');
+    } else {
+      setCloudSyncMsg('❌ Gagal sinkronisasi: ' + (res.message || 'Cek koneksi internet'));
+    }
+  };
 
   const handleSavePin = (e) => {
     e.preventDefault();
@@ -55,15 +67,43 @@ export const BackupSettings = () => {
             : 'Saat ini berjalan di mode lokal browser. Ketika Anda deploy ke Vercel dan memasukkan DATABASE_URL dari neon.tech, aplikasi akan otomatis beralih ke database Neon Tech tanpa perlu ubah kode.'}
         </p>
 
-        <div className="p-4 rounded-xl bg-stone-900 border border-stone-700/80 space-y-2">
-          <p className="font-bold text-stone-200">Cara Menghubungkan Neon Tech di Vercel:</p>
-          <ol className="list-decimal list-inside text-stone-400 space-y-1 pl-1">
-            <li>Daftar/Login di <a href="https://neon.tech" target="_blank" rel="noreferrer" className="text-amber-400 underline">neon.tech</a> dan buat project database gratis.</li>
-            <li>Salin <strong>Connection String</strong> (contoh: <code>postgresql://user:pass@ep-xyz.neon.tech/neondb?sslmode=require</code>).</li>
-            <li>Di dashboard proyek Vercel Anda, buka <strong>Settings ➔ Environment Variables</strong>.</li>
-            <li>Tambahkan key <strong><code>DATABASE_URL</code></strong> dengan connection string tersebut.</li>
-            <li>Selesai! Vercel otomatis menjalankan API serverless Neon Tech.</li>
-          </ol>
+        {/* Sync Local to Cloud Button */}
+        <div className="p-4 rounded-xl bg-stone-900 border border-emerald-800/50 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="font-bold text-stone-200 flex items-center gap-1.5">
+              <CloudUpload className="w-4 h-4 text-emerald-400" />
+              <span>Sinkronkan Data ke Database Cloud (HP & Tamu)</span>
+            </p>
+            {lastSavedCloud && (
+              <span className="text-emerald-400 font-mono text-[10px]">Tersimpan: {lastSavedCloud}</span>
+            )}
+          </div>
+          <p className="text-stone-400 leading-relaxed">
+            Klik tombol di bawah untuk memaksa seluruh data yang baru Anda edit di komputer ini (mempelai, acara, foto, maps) tersimpan ke server database cloud agar HP dan semua tamu undangan langsung melihat versi terbaru.
+          </p>
+          <button
+            type="button"
+            onClick={handleManualSync}
+            disabled={isSavingCloud}
+            className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold flex items-center gap-2 shadow cursor-pointer transition-all active:scale-95"
+          >
+            {isSavingCloud ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                <span>Sedang Mengirim ke Cloud...</span>
+              </>
+            ) : (
+              <>
+                <CloudUpload className="w-4 h-4" />
+                <span>Kirim & Sinkronkan Sekarang</span>
+              </>
+            )}
+          </button>
+          {cloudSyncMsg && (
+            <p className="text-xs font-medium p-2.5 rounded-lg bg-stone-800 border border-stone-700 text-stone-200">
+              {cloudSyncMsg}
+            </p>
+          )}
         </div>
       </div>
 
