@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-heading: 'Playfair Display', serif;
+    --font-script: 'Sacramento', cursive;
+    --font-sans: 'Plus Jakarta Sans', sans-serif;
+    --font-accent: 'Cinzel', serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-family: var(--font-sans);
+  }
+}
+
+/* Custom Typography & Utility classes */
+.font-script {
+  font-family: 'Sacramento', cursive;
+}
+
+.font-romantic {
+  font-family: 'Great Vibes', cursive;
+}
+
+.font-signature {
+  font-family: 'Alex Brush', cursive;
+}
+
+.font-serif-heading {
+  font-family: 'Playfair Display', serif;
+}
+
+.font-cinzel {
+  font-family: 'Cinzel', serif;
+}
+
+.font-cormorant {
+  font-family: 'Cormorant Garamond', serif;
+}
+
+/* Animations */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
+}
+
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1.5deg);
+  }
+}
+
+.animate-float {
+  animation: float-gentle 4s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(184, 144, 83, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(184, 144, 83, 0.7);
+  }
+}
+
+.animate-glow {
+  animation: pulse-glow 2.5s infinite;
+}
+
+/* Hide scrollbar for clean mobile view */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom scrollbar for admin panel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(180, 145, 95, 0.4);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(180, 145, 95, 0.7);
+}
