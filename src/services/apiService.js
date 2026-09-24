@@ -36,6 +36,17 @@ export const saveRemoteData = async (data) => {
   }
 };
 
+export const fetchRemoteWishes = async () => {
+  try {
+    const res = await fetch('/api/wishes');
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.wishes || null;
+  } catch (e) {
+    return null;
+  }
+};
+
 export const submitRemoteWish = async (wish) => {
   try {
     const res = await fetch('/api/wishes', {

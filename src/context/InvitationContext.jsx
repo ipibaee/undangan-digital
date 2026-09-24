@@ -3,7 +3,7 @@ import { initialInvitationData } from '../data/defaultData';
 import { themes } from '../data/themes';
 import { 
   checkDbStatus, fetchRemoteData, saveRemoteData, 
-  submitRemoteWish, replyRemoteWish, deleteRemoteWish 
+  submitRemoteWish, replyRemoteWish, deleteRemoteWish, fetchRemoteWishes 
 } from '../services/apiService';
 
 const STORAGE_KEY = 'undangan_digital_data_v1';
@@ -91,11 +91,28 @@ export const InvitationProvider = ({ children }) => {
         const status = await checkDbStatus();
         setDbStatus(status);
         if (status.connected) {
-          const remoteData = await fetchRemoteData();
-          if (remoteData && remoteData.couple) {
-            setData(remoteData);
+          const [remoteData, remoteWishes] = await Promise.all([
+            fetchRemoteData(),
+            fetchRemoteWishes()
+          ]);
+
+          let combinedData = remoteData;
+          if (combinedData && combinedData.couple) {
+            if (remoteWishes && Array.isArray(remoteWishes) && remoteWishes.length > 0) {
+              combinedData.wishes = remoteWishes.map(w => ({
+                id: w.id,
+                name: w.name,
+                relation: w.relation,
+                attendance: w.attendance,
+                pax: w.pax,
+                message: w.message,
+                reply: w.reply,
+                createdAt: w.created_at ? new Date(w.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : (w.createdAt || '')
+              }));
+            }
+            setData(combinedData);
             try {
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(remoteData));
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(combinedData));
             } catch (e) {}
           }
         }
@@ -110,6 +127,44 @@ export const InvitationProvider = ({ children }) => {
 
     return () => clearTimeout(safetyTimer);
   }, []);
+
+  // Realtime Polling for Wishes & Replies (syncs guest messages and host replies live without refreshing!)
+  useEffect(() => {
+    if (!dbStatus.connected) return;
+
+    const pollWishes = async () => {
+      try {
+        const remoteWishes = await fetchRemoteWishes();
+        if (remoteWishes && Array.isArray(remoteWishes)) {
+          const formatted = remoteWishes.map(w => ({
+            id: w.id,
+            name: w.name,
+            relation: w.relation,
+            attendance: w.attendance,
+            pax: w.pax,
+            message: w.message,
+            reply: w.reply,
+            createdAt: w.created_at ? new Date(w.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : (w.createdAt || '')
+          }));
+
+          setData(prev => {
+            const prevJson = JSON.stringify(prev.wishes || []);
+            const nextJson = JSON.stringify(formatted);
+            if (prevJson !== nextJson) {
+              return { ...prev, wishes: formatted };
+            }
+            return prev;
+          });
+        }
+      } catch (err) {
+        // silent
+      }
+    };
+
+    pollWishes();
+    const interval = setInterval(pollWishes, 3500);
+    return () => clearInterval(interval);
+  }, [dbStatus.connected]);
 
   // Save to localStorage whenever data changes + sync to Neon if connected
   useEffect(() => {

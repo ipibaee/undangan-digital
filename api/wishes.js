@@ -17,6 +17,16 @@ export default async function handler(req, res) {
   try {
     await initTablesIfNeed(sql);
 
+    // Parse body safely
+    let body = req.body;
+    if (typeof body === 'string') {
+      try {
+        body = JSON.parse(body);
+      } catch (e) {
+        body = {};
+      }
+    }
+
     // GET all wishes
     if (req.method === 'GET') {
       const rows = await sql`SELECT * FROM wishes ORDER BY created_at DESC`;
@@ -25,18 +35,21 @@ export default async function handler(req, res) {
 
     // POST new wish
     if (req.method === 'POST') {
-      const { id, name, relation, attendance, pax, message } = req.body;
+      const { id, name, relation, attendance, pax, message } = body;
       const wishId = id || 'w-' + Date.now();
       await sql`
         INSERT INTO wishes (id, name, relation, attendance, pax, message)
-        VALUES (${wishId}, ${name}, ${relation || 'Tamu'}, ${attendance}, ${pax || 1}, ${message})
+        VALUES (${wishId}, ${name || 'Tamu'}, ${relation || 'Tamu'}, ${attendance || 'hadir'}, ${pax || 1}, ${message || ''})
+        ON CONFLICT (id) DO UPDATE
+        SET name = ${name || 'Tamu'}, relation = ${relation || 'Tamu'}, attendance = ${attendance || 'hadir'}, pax = ${pax || 1}, message = ${message || ''}
       `;
       return res.status(201).json({ success: true, id: wishId });
     }
 
     // PUT reply to a wish
     if (req.method === 'PUT') {
-      const { id, reply } = req.body;
+      const { id, reply } = body;
+      if (!id) return res.status(400).json({ error: 'Missing id' });
       await sql`
         UPDATE wishes SET reply = ${reply} WHERE id = ${id}
       `;
@@ -45,7 +58,8 @@ export default async function handler(req, res) {
 
     // DELETE a wish
     if (req.method === 'DELETE') {
-      const { id } = req.query;
+      const id = req.query.id || body?.id;
+      if (!id) return res.status(400).json({ error: 'Missing id' });
       await sql`
         DELETE FROM wishes WHERE id = ${id}
       `;
