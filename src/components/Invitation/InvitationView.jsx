@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useInvitation } from '../../context/InvitationContext';
 import { CoverSplash } from './CoverSplash';
 import { HeroSection } from './HeroSection';
@@ -15,9 +15,22 @@ import { FloatingNavbar } from './FloatingNavbar';
 import { AutoScrollButton } from './AutoScrollButton';
 import { Lock, Heart, Shield } from 'lucide-react';
 import { CornerFlourish } from './Ornaments';
+import { InitialLoadingScreen } from './InitialLoadingScreen';
 
 export const InvitationView = ({ onOpenAdmin }) => {
-  const { data, currentTheme, isOpen } = useInvitation();
+  const { data, currentTheme, isOpen, isInitialLoading } = useInvitation();
+  const [renderLoader, setRenderLoader] = useState(true);
+  const [isFadingOut, setIsFadingOut] = useState(false);
+
+  useEffect(() => {
+    if (!isInitialLoading) {
+      setIsFadingOut(true);
+      const timer = setTimeout(() => {
+        setRenderLoader(false);
+      }, 700);
+      return () => clearTimeout(timer);
+    }
+  }, [isInitialLoading]);
 
   const bgType = data.meta?.bgType || 'theme';
   let customBgStyle = {};
@@ -41,6 +54,10 @@ export const InvitationView = ({ onOpenAdmin }) => {
       className={`min-h-screen relative transition-all duration-500 ${bgClass}`}
       style={customBgStyle}
     >
+      {/* Initial Romantic Intro Loading Screen */}
+      {renderLoader && (
+        <InitialLoadingScreen isFadingOut={isFadingOut} couple={data.couple} />
+      )}
       {/* Pattern Overlay */}
       <div 
         className="fixed inset-0 pointer-events-none opacity-30 z-0" 

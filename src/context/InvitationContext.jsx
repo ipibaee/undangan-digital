@@ -37,6 +37,9 @@ export const InvitationProvider = ({ children }) => {
   const [isSavingCloud, setIsSavingCloud] = useState(false);
   const [lastSavedCloud, setLastSavedCloud] = useState(null);
 
+  // Initial cloud loading state to prevent showing old template before DB loads
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
   // Invitation open state (splash screen passed)
   const [isOpen, setIsOpen] = useState(false);
   
@@ -77,6 +80,11 @@ export const InvitationProvider = ({ children }) => {
       setGuestName(decodeURIComponent(kpdParam));
     }
 
+    // Safety timeout to ensure loading screen never hangs longer than 2.5s
+    const safetyTimer = setTimeout(() => {
+      setIsInitialLoading(false);
+    }, 2500);
+
     // Check Neon Tech cloud database connection
     const syncCloudDb = async () => {
       try {
@@ -85,30 +93,22 @@ export const InvitationProvider = ({ children }) => {
         if (status.connected) {
           const remoteData = await fetchRemoteData();
           if (remoteData && remoteData.couple) {
-            // Check if local data has user customization while remote is still template
-            const localIsCustom = !isTemplateData(data);
-            const remoteIsTemplate = isTemplateData(remoteData);
-
-            if (localIsCustom && remoteIsTemplate) {
-              // Local is newer/customized! Push local edits to cloud
-              await saveRemoteData(data);
-              setLastSavedCloud(new Date().toLocaleTimeString('id-ID'));
-            } else {
-              // Remote has customized data, sync to local
-              setData(remoteData);
+            setData(remoteData);
+            try {
               localStorage.setItem(STORAGE_KEY, JSON.stringify(remoteData));
-            }
-          } else if (data && !isTemplateData(data)) {
-            // Remote has no data yet, push local to cloud
-            await saveRemoteData(data);
-            setLastSavedCloud(new Date().toLocaleTimeString('id-ID'));
+            } catch (e) {}
           }
         }
       } catch (err) {
         setDbStatus({ connected: false, provider: 'local' });
+      } finally {
+        setIsInitialLoading(false);
+        clearTimeout(safetyTimer);
       }
     };
     syncCloudDb();
+
+    return () => clearTimeout(safetyTimer);
   }, []);
 
   // Save to localStorage whenever data changes + sync to Neon if connected
@@ -405,6 +405,7 @@ export const InvitationProvider = ({ children }) => {
         saveToCloudNow,
         isSavingCloud,
         lastSavedCloud,
+        isInitialLoading,
       }}
     >
       {children}
