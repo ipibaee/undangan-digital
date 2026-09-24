@@ -62,7 +62,7 @@ export const GallerySection = () => {
         </div>
 
         {/* Live Streaming Video Section */}
-        {streaming.enabled && (
+        {streaming?.enabled && (
           <div className={`p-6 sm:p-8 rounded-3xl ${currentTheme.cardBg} space-y-4 shadow-md`}>
             <div className="text-center space-y-2">
               <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${currentTheme.badgeBg}`}>
@@ -82,7 +82,7 @@ export const GallerySection = () => {
               {streaming.youtubeId ? (
                 <iframe
                   title="Streaming Pernikahan"
-                  src={`https://www.youtube.com/embed/${streaming.youtubeId}?rel=0`}
+                  src={`https://www.youtube.com/embed/${streaming.youtubeId.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|live\/|shorts\/))([\w-]{11})/) ? streaming.youtubeId.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|live\/|shorts\/))([\w-]{11})/)[1] : streaming.youtubeId.trim()}?rel=0`}
                   className="w-full h-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen

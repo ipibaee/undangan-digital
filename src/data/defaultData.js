@@ -132,11 +132,11 @@ export const initialInvitationData = {
 
   // Video Streaming / YouTube
   streaming: {
-    enabled: true,
+    enabled: false,
     title: "Live Streaming Pernikahan",
     description: "Bagi keluarga dan sahabat yang belum dapat hadir secara langsung, Anda dapat menyaksikan momen bahagia kami melalui tautan berikut:",
-    youtubeId: "dQw4w9WgXcQ", // or wedding highlight video
-    streamUrl: "https://youtube.com/live"
+    youtubeId: "",
+    streamUrl: ""
   },
 
   // Amplop Digital & Titip Kado Fisik

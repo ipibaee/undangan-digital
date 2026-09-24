@@ -24,7 +24,7 @@ export const AdminPanel = ({ onExitAdmin }) => {
     { id: 'ucapan', label: 'Balas Ucapan Tamu', icon: MessageSquare, badge: unrepliedCount > 0 ? `${unrepliedCount} Baru` : null, count: unrepliedCount === 0 ? data.wishes?.length : undefined },
     { id: 'mempelai', label: 'Profil Mempelai', icon: Users },
     { id: 'acara', label: 'Jadwal & Lokasi', icon: Calendar },
-    { id: 'cerita-galeri', label: 'Kisah & Galeri HD', icon: BookHeart },
+    { id: 'cerita-galeri', label: 'Galeri, Cerita & Streaming', icon: BookHeart },
     { id: 'kado', label: 'Amplop & Kado', icon: Gift },
     { id: 'tema-musik', label: 'Tema & Musik', icon: Palette },
     { id: 'backup', label: 'Pengaturan & Backup', icon: Settings },
