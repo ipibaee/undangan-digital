@@ -4,7 +4,8 @@ import { Shield, Download, Upload, RotateCcw, Key, AlertTriangle } from 'lucide-
 
 export const BackupSettings = () => {
   const { data, updateField, exportDataJson, importDataJson, resetData, dbStatus = { connected: false } } = useInvitation();
-  const [newPin, setNewPin] = useState(data.meta.adminPin || '1234');
+  const [newPin, setNewPin] = useState(data.meta.adminPin === '1234' ? '292003' : (data.meta.adminPin || '292003'));
+
 
   const [pinSaved, setPinSaved] = useState(false);
 

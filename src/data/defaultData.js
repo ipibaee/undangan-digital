@@ -4,7 +4,7 @@ export const initialInvitationData = {
     title: "The Wedding of Justin & Sisca",
     quote: "Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang. (QS. Ar-Rum: 21)",
     quoteSource: "QS. Ar-Rum: 21",
-    adminPin: "1234",
+    adminPin: "292003",
     activeTheme: "champagne-floral", // champagne-floral | royal-gold | blush-rose | sage-botanical
     fontFamily: "font-serif-heading",
     accentColor: "#928573",
