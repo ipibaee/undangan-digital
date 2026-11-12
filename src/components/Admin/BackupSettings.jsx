@@ -45,26 +45,26 @@ export const BackupSettings = () => {
   return (
     <div className="space-y-8 text-stone-100 text-xs">
       
-      {/* Neon Tech Database Connection Status */}
+      {/* Database Connection Status */}
       <div className="p-6 rounded-2xl bg-stone-800 border border-stone-700 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="font-bold text-sm text-white flex items-center gap-2">
             <Shield className="w-4 h-4 text-emerald-400" />
-            <span>Database Cloud Neon Tech (Serverless PostgreSQL)</span>
+            <span>Database Server (MySQL / aaPanel)</span>
           </h3>
           <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
             dbStatus.connected 
               ? 'bg-emerald-950 text-emerald-300 border border-emerald-700' 
               : 'bg-stone-700 text-stone-300 border border-stone-600'
           }`}>
-            {dbStatus.connected ? 'Terhubung ke Neon Tech' : 'Mode Penyimpanan Lokal'}
+            {dbStatus.connected ? 'Terhubung ke Database' : 'Mode Penyimpanan Lokal'}
           </span>
         </div>
 
         <p className="text-stone-300 leading-relaxed">
           {dbStatus.connected
-            ? 'Aplikasi telah terhubung ke database Neon Tech. Setiap doa restu dari tamu dan perubahan data akan tersimpan langsung di server cloud PostgreSQL.'
-            : 'Saat ini berjalan di mode lokal browser. Ketika Anda deploy ke Vercel dan memasukkan DATABASE_URL dari neon.tech, aplikasi akan otomatis beralih ke database Neon Tech tanpa perlu ubah kode.'}
+            ? 'Aplikasi terhubung ke database server. Seluruh data undangan, profil mempelai, foto, kado, dan ucapan tamu tersimpan penuh di database secara real-time.'
+            : 'Saat ini berjalan di mode penyimpanan lokal browser. Pastikan server backend dan database MySQL di aaPanel aktif.'}
         </p>
 
         {/* Sync Local to Cloud Button */}
@@ -72,7 +72,7 @@ export const BackupSettings = () => {
           <div className="flex items-center justify-between">
             <p className="font-bold text-stone-200 flex items-center gap-1.5">
               <CloudUpload className="w-4 h-4 text-emerald-400" />
-              <span>Sinkronkan Data ke Database Cloud (HP & Tamu)</span>
+              <span>Simpan Perubahan ke Database Server</span>
             </p>
             {lastSavedCloud && (
               <span className="text-emerald-400 font-mono text-[10px]">Tersimpan: {lastSavedCloud}</span>

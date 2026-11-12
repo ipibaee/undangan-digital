@@ -2,8 +2,9 @@ import React from 'react';
 import { Heart, Sparkles } from 'lucide-react';
 
 export const InitialLoadingScreen = ({ isFadingOut, couple }) => {
-  const groom = couple?.groom?.nickName || 'Ipi';
-  const bride = couple?.bride?.nickName || 'Seli';
+  const hasNames = Boolean(couple?.groom?.nickName && couple?.bride?.nickName);
+  const groom = couple?.groom?.nickName || 'Mempelai';
+  const bride = couple?.bride?.nickName || 'Mempelai';
 
   return (
     <div
@@ -27,10 +28,10 @@ export const InitialLoadingScreen = ({ isFadingOut, couple }) => {
         {/* Wedding Title */}
         <div className="space-y-1">
           <p className="text-[11px] uppercase tracking-[0.3em] text-emerald-900/60 font-semibold">
-            The Wedding of
+            {hasNames ? 'The Wedding of' : 'Wedding Invitation'}
           </p>
           <h1 className="font-romantic text-4xl sm:text-5xl text-emerald-900 tracking-wide font-normal">
-            {groom} & {bride}
+            {hasNames ? `${groom} & ${bride}` : 'Momen Bahagia'}
           </h1>
         </div>
 

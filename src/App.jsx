@@ -8,28 +8,30 @@ function AppContent() {
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Check URL query on mount (?panel=admin or /admin)
+  // Deteksi route: cek apakah membuka path /admin atau query legacy ?panel=admin
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('panel') === 'admin' || window.location.pathname.endsWith('/admin')) {
-      setIsAdminMode(true);
-    }
+    const syncRouteFromUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      const isPathAdmin = window.location.pathname === '/admin' || window.location.pathname.startsWith('/admin');
+      const isParamAdmin = params.get('panel') === 'admin';
+      setIsAdminMode(isPathAdmin || isParamAdmin);
+    };
+
+    syncRouteFromUrl();
+    window.addEventListener('popstate', syncRouteFromUrl);
+    return () => window.removeEventListener('popstate', syncRouteFromUrl);
   }, []);
 
   const handleOpenAdmin = () => {
     setIsAdminMode(true);
-    // Update URL query smoothly
-    const url = new URL(window.location);
-    url.searchParams.set('panel', 'admin');
-    window.history.pushState({}, '', url);
+    // Navigasi URL bersih ke /admin
+    window.history.pushState({}, '', '/admin');
   };
 
   const handleExitAdmin = () => {
     setIsAdminMode(false);
-    // Remove admin query param
-    const url = new URL(window.location);
-    url.searchParams.delete('panel');
-    window.history.pushState({}, '', url);
+    // Kembali ke halaman utama /
+    window.history.pushState({}, '', '/');
   };
 
   if (isAdminMode) {
