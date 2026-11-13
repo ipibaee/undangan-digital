@@ -16,7 +16,7 @@ import { BackupSettings } from './BackupSettings';
 import { ClientInvitationManager } from './ClientInvitationManager';
 import { LandingPageEditor } from './LandingPageEditor';
 
-export const AdminPanel = ({ onExitAdmin }) => {
+export const AdminPanel = ({ onExitAdmin, authRole = 'superadmin' }) => {
   const { data, dbStatus, saveToCloudNow, isSavingCloud, lastSavedCloud, currentSlug } = useInvitation();
   const [activeTab, setActiveTab] = useState('buku-tamu');
   const [saveToast, setSaveToast] = useState(null);
@@ -33,18 +33,20 @@ export const AdminPanel = ({ onExitAdmin }) => {
 
   const unrepliedCount = (data.wishes || []).filter(w => !w.reply).length;
 
-  const tabs = [
+  const allTabs = [
     { id: 'buku-tamu', label: 'Buku Tamu & Sebar WA', icon: Users, badge: 'Utama' },
-    { id: 'kelola-klien', label: 'Semua Undangan Klien', icon: FolderHeart, badge: 'Bisnis' },
-    { id: 'pengaturan-landing', label: 'Web Utama & Paket Harga', icon: LayoutDashboard, badge: 'Komersial' },
+    { id: 'kelola-klien', label: 'Semua Undangan Klien', icon: FolderHeart, badge: 'Bisnis', superAdminOnly: true },
+    { id: 'pengaturan-landing', label: 'Web Utama & Paket Harga', icon: LayoutDashboard, badge: 'Komersial', superAdminOnly: true },
     { id: 'ucapan', label: 'Balas Ucapan Tamu', icon: MessageSquare, badge: unrepliedCount > 0 ? `${unrepliedCount} Baru` : null, count: unrepliedCount === 0 ? data.wishes?.length : undefined },
     { id: 'mempelai', label: 'Profil Mempelai', icon: Users },
     { id: 'acara', label: 'Jadwal & Lokasi', icon: Calendar },
     { id: 'cerita-galeri', label: 'Galeri, Cerita & Streaming', icon: BookHeart },
     { id: 'kado', label: 'Amplop & Kado', icon: Gift },
     { id: 'tema-musik', label: 'Tema & Musik', icon: Palette },
-    { id: 'backup', label: 'Pengaturan & Backup', icon: Settings },
+    { id: 'backup', label: 'Pengaturan & Backup', icon: Settings, superAdminOnly: true },
   ];
+
+  const tabs = authRole === 'client' ? allTabs.filter(t => !t.superAdminOnly) : allTabs;
 
 
   return (
@@ -63,6 +65,15 @@ export const AdminPanel = ({ onExitAdmin }) => {
               <span className="px-2 py-0.5 rounded text-[11px] bg-stone-800 text-stone-300 font-mono">
                 /{currentSlug || 'default'}
               </span>
+              {authRole === 'superadmin' ? (
+                <span className="px-2 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold uppercase tracking-wider">
+                  Super Admin
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold uppercase tracking-wider">
+                  Klien Mempelai
+                </span>
+              )}
             </h1>
             <p className="text-[11px] text-stone-400 flex items-center gap-1.5">
               <span className={`w-2 h-2 rounded-full ${dbStatus.connected ? 'bg-emerald-400' : 'bg-amber-400'}`} />

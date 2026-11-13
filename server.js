@@ -53,11 +53,18 @@ const initDatabase = async () => {
         slug VARCHAR(100) UNIQUE NOT NULL,
         title VARCHAR(255),
         theme_id VARCHAR(50) DEFAULT 'sage-botanical',
+        client_password VARCHAR(100) DEFAULT '123456',
         data LONGTEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
+
+    try {
+      await db.query(`ALTER TABLE invitations ADD COLUMN client_password VARCHAR(100) DEFAULT '123456'`);
+    } catch (e) {
+      // Kolom sudah ada
+    }
 
     // 2. Tabel ucapan & doa tamu (Wishes) dengan isolasi invitation_slug
     await db.query(`
@@ -159,10 +166,76 @@ app.get('/api/status', async (req, res) => {
 app.get('/api/invitations', async (req, res) => {
   try {
     const db = getPool();
-    const [rows] = await db.query('SELECT id, slug, title, theme_id, created_at, updated_at FROM invitations ORDER BY updated_at DESC');
+    const [rows] = await db.query('SELECT id, slug, title, theme_id, client_password, created_at, updated_at FROM invitations ORDER BY updated_at DESC');
     return res.json({ success: true, count: rows.length, invitations: rows });
   } catch (error) {
     return res.status(500).json({ error: error.message });
+  }
+});
+
+// 2a. Autentikasi Login (Super Admin & Klien)
+app.post('/api/auth/login', async (req, res) => {
+  const { username, password, slug } = req.body;
+  const cleanPass = String(password || '').trim();
+  const cleanUser = String(username || '').trim().toLowerCase();
+  const targetSlug = String(slug || cleanUser || '').trim().toLowerCase();
+
+  const MASTER_PIN = process.env.ADMIN_PIN || '292003';
+
+  // 1. Cek Login Super Admin
+  if ((cleanUser === 'admin' || cleanUser === 'superadmin' || !cleanUser) && cleanPass === MASTER_PIN) {
+    return res.json({
+      success: true,
+      role: 'superadmin',
+      name: 'Super Admin',
+      message: 'Berhasil masuk sebagai Super Admin'
+    });
+  }
+
+  // 2. Cek Login Klien berdasarkan Slug
+  try {
+    const db = getPool();
+    const [rows] = await db.query(
+      'SELECT slug, title, client_password FROM invitations WHERE slug = ? LIMIT 1',
+      [targetSlug]
+    );
+
+    if (rows && rows.length > 0) {
+      const clientRecord = rows[0];
+      const validClientPass = clientRecord.client_password || '123456';
+
+      if (cleanPass === validClientPass || cleanPass === MASTER_PIN) {
+        return res.json({
+          success: true,
+          role: cleanPass === MASTER_PIN ? 'superadmin' : 'client',
+          slug: clientRecord.slug,
+          title: clientRecord.title,
+          message: `Berhasil masuk ke panel ${clientRecord.slug}`
+        });
+      }
+
+      return res.status(401).json({
+        success: false,
+        message: 'Password / PIN yang Anda masukkan salah.'
+      });
+    }
+
+    // Jika target slug tidak ditemukan, cek apakah menggunakan master PIN
+    if (cleanPass === MASTER_PIN) {
+      return res.json({
+        success: true,
+        role: 'superadmin',
+        slug: targetSlug || 'default',
+        message: 'Masuk dengan Master PIN Super Admin'
+      });
+    }
+
+    return res.status(404).json({
+      success: false,
+      message: `Akun undangan "${targetSlug}" tidak ditemukan. Pastikan slug sudah terdaftar.`
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
   }
 });
 
@@ -248,17 +321,19 @@ app.post('/api/invitation/:slug?', async (req, res) => {
     let payload = req.body.data || req.body;
     const title = payload.meta?.title || `The Wedding of ${payload.couple?.groom?.nickName || ''} & ${payload.couple?.bride?.nickName || ''}`;
     const themeId = payload.meta?.activeTheme || 'sage-botanical';
+    const clientPassword = req.body.client_password || payload.client_password || '123456';
     const jsonString = typeof payload === 'string' ? payload : JSON.stringify(payload);
 
     await db.query(`
-      INSERT INTO invitations (slug, title, theme_id, data, updated_at)
-      VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+      INSERT INTO invitations (slug, title, theme_id, client_password, data, updated_at)
+      VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
       ON DUPLICATE KEY UPDATE 
         title = VALUES(title),
         theme_id = VALUES(theme_id),
+        client_password = COALESCE(VALUES(client_password), client_password),
         data = VALUES(data),
         updated_at = CURRENT_TIMESTAMP
-    `, [slug, title, themeId, jsonString]);
+    `, [slug, title, themeId, clientPassword, jsonString]);
 
     return res.json({ 
       success: true, 

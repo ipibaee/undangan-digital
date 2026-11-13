@@ -23,16 +23,32 @@ export const fetchRemoteData = async (slug = 'default') => {
   }
 };
 
-export const saveRemoteData = async (data, slug = 'default') => {
+export const saveRemoteData = async (data, slug = 'default', client_password = null) => {
   try {
+    const payload = { slug, data };
+    if (client_password) payload.client_password = client_password;
     const res = await fetch(`/api/invitation/${slug}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug, data })
+      body: JSON.stringify(payload)
     });
     return res.ok;
   } catch (e) {
     return false;
+  }
+};
+
+export const loginAuth = async ({ username, password, slug }) => {
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password, slug })
+    });
+    const json = await res.json();
+    return { ok: res.ok, status: res.status, ...json };
+  } catch (e) {
+    return { ok: false, message: 'Gagal menghubungi server: ' + e.message };
   }
 };
 

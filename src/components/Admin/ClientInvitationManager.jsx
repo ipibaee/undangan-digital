@@ -3,7 +3,8 @@ import { useInvitation } from '../../context/InvitationContext';
 import { fetchAllInvitations, saveRemoteData } from '../../services/apiService';
 import { 
   Users, Plus, ExternalLink, Edit3, Trash2, Copy, Check, 
-  Sparkles, RefreshCw, FolderHeart, ShieldCheck
+  Sparkles, RefreshCw, FolderHeart, ShieldCheck, KeyRound, 
+  Send, Dices, Lock
 } from 'lucide-react';
 import { getPresetDataForSlug } from '../../data/defaultData';
 import { themes } from '../../data/themes';
@@ -14,11 +15,13 @@ export const ClientInvitationManager = () => {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [copiedSlug, setCopiedSlug] = useState(null);
+  const [copiedWaSlug, setCopiedWaSlug] = useState(null);
 
   // Form state untuk buat undangan baru
   const [newSlug, setNewSlug] = useState('');
   const [groomNick, setGroomNick] = useState('');
   const [brideNick, setBrideNick] = useState('');
+  const [newPassword, setNewPassword] = useState('123456');
   const [chosenTheme, setChosenTheme] = useState('punakawan-terracotta');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -37,6 +40,15 @@ export const ClientInvitationManager = () => {
   useEffect(() => {
     loadAll();
   }, []);
+
+  const generateRandomPassword = () => {
+    const chars = '0123456789';
+    let res = '';
+    for (let i = 0; i < 6; i++) {
+      res += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setNewPassword(res);
+  };
 
   const handleCreateNew = async (e) => {
     e.preventDefault();
@@ -57,9 +69,9 @@ export const ClientInvitationManager = () => {
       templateData.meta.activeTheme = chosenTheme;
       templateData.meta.title = `The Wedding of ${templateData.couple.groom.nickName} & ${templateData.couple.bride.nickName}`;
 
-      const res = await saveRemoteData(templateData, cleanSlug);
+      const res = await saveRemoteData(templateData, cleanSlug, newPassword.trim() || '123456');
       if (res) {
-        alert(`Undangan "${cleanSlug}" berhasil dibuat! Mengalihkan ke panel undangan baru...`);
+        alert(`Undangan "${cleanSlug}" dengan password "${newPassword}" berhasil dibuat! Mengalihkan ke panel undangan baru...`);
         window.location.href = `/${cleanSlug}/admin`;
       } else {
         alert('Gagal membuat undangan di database. Cek koneksi server aaPanel.');
@@ -77,6 +89,26 @@ export const ClientInvitationManager = () => {
     navigator.clipboard.writeText(url);
     setCopiedSlug(slug);
     setTimeout(() => setCopiedSlug(null), 2500);
+  };
+
+  const handleCopyClientWaFormat = (inv) => {
+    const origin = window.location.origin;
+    const clientPass = inv.client_password || '123456';
+    const message = 
+`Halo Kakak Mempelai, terima kasih telah memesan undangan digital di IpiInvite! 🎉
+
+Berikut detail akses undangan pernikahan Anda:
+🌐 Link Undangan: ${origin}/${inv.slug}
+🔑 Panel Pengelola: ${origin}/${inv.slug}/admin
+🔒 Password Panel: ${clientPass}
+
+Kakak bisa langsung masuk ke Panel Pengelola untuk melengkapi foto prewedding, rincian acara, nomor rekening kado/amplop digital, serta menyebarkan undangan ke tamu via WhatsApp.
+
+Jika ada yang perlu dibantu, jangan ragu hubungi kami ya. Semoga acaranya lancar dan berkah! ✨`;
+
+    navigator.clipboard.writeText(message);
+    setCopiedWaSlug(inv.slug);
+    setTimeout(() => setCopiedWaSlug(null), 2500);
   };
 
   return (
@@ -165,17 +197,40 @@ export const ClientInvitationManager = () => {
                     <h3 className="font-bold text-sm text-white">
                       {inv.title || 'Undangan Digital'}
                     </h3>
-                    <p className="text-[11px] text-stone-400 flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-stone-400">
                       <span>Tema: <strong>{themeInfo.name}</strong></span>
-                      {inv.updated_at && (
-                        <span>• Update: {new Date(inv.updated_at).toLocaleDateString('id-ID')}</span>
-                      )}
-                    </p>
+                      <div className="flex items-center gap-1 text-amber-300 font-mono bg-stone-950 px-2 py-0.5 rounded border border-stone-800">
+                        <Lock className="w-3 h-3 text-amber-400" />
+                        <span>Pass: <strong>{inv.client_password || '123456'}</strong></span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="pt-2 border-t border-stone-800 flex flex-wrap items-center gap-2">
+                <div className="pt-3 border-t border-stone-800 flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => handleCopyClientWaFormat(inv)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                      copiedWaSlug === inv.slug 
+                        ? 'bg-emerald-600 text-white' 
+                        : 'bg-emerald-800/40 hover:bg-emerald-700/60 text-emerald-300 border border-emerald-500/40'
+                    }`}
+                    title="Salin rincian akun lengkap untuk dikirimkan ke klien via WhatsApp"
+                  >
+                    {copiedWaSlug === inv.slug ? (
+                      <>
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Rincian WA Tersalin!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-3.5 h-3.5" />
+                        <span>Salin Akun untuk Klien</span>
+                      </>
+                    )}
+                  </button>
+
                   <button
                     onClick={() => handleCopyLink(inv.slug)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1 transition-all cursor-pointer ${
@@ -192,7 +247,7 @@ export const ClientInvitationManager = () => {
                     ) : (
                       <>
                         <Copy className="w-3.5 h-3.5" />
-                        <span>Salin Link</span>
+                        <span>Link</span>
                       </>
                     )}
                   </button>
@@ -212,7 +267,7 @@ export const ClientInvitationManager = () => {
                     className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold flex items-center gap-1 transition-all ml-auto"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
-                    <span>Buka Panel Ini</span>
+                    <span>Buka Panel</span>
                   </a>
                 </div>
               </div>
@@ -231,7 +286,7 @@ export const ClientInvitationManager = () => {
                 <span>Buat Undangan Klien Baru</span>
               </h3>
               <p className="text-xs text-stone-400">
-                Tentukan slug URL unik (misal: <code>budi-ani</code>) untuk klien baru Anda.
+                Tentukan slug URL unik (misal: <code>budi-ani</code>) dan password panel untuk klien baru Anda.
               </p>
             </div>
 
@@ -280,6 +335,36 @@ export const ClientInvitationManager = () => {
                     className="w-full px-3 py-2 rounded-xl bg-stone-800/80 border border-stone-700 text-white text-xs focus:outline-none focus:ring-2 focus:ring-amber-500"
                   />
                 </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-stone-300">
+                    Password Panel Klien
+                  </label>
+                  <button
+                    type="button"
+                    onClick={generateRandomPassword}
+                    className="text-[11px] text-amber-400 hover:text-amber-300 flex items-center gap-1 cursor-pointer font-medium"
+                  >
+                    <Dices className="w-3.5 h-3.5" />
+                    <span>Acak 6 Angka</span>
+                  </button>
+                </div>
+                <div className="relative">
+                  <KeyRound className="w-4 h-4 text-stone-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    required
+                    placeholder="123456"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-stone-800/80 border border-stone-700 text-white text-xs font-mono focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                </div>
+                <p className="text-[10px] text-stone-500 mt-1">
+                  *Password ini yang akan diberikan ke klien agar bisa mengedit undangannya sendiri.
+                </p>
               </div>
 
               <div>

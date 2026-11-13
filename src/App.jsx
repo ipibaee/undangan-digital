@@ -9,6 +9,7 @@ function AppContent() {
   const { currentSlug } = useInvitation();
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authRole, setAuthRole] = useState('superadmin'); // 'superadmin' | 'client'
 
   // Deteksi route: cek apakah membuka path /admin, /:slug/admin atau query legacy ?panel=admin
   useEffect(() => {
@@ -41,12 +42,15 @@ function AppContent() {
     if (!isAuthenticated) {
       return (
         <AdminAuth
-          onAuthenticated={() => setIsAuthenticated(true)}
+          onAuthenticated={({ role }) => {
+            setIsAuthenticated(true);
+            setAuthRole(role || 'client');
+          }}
           onCancel={handleExitAdmin}
         />
       );
     }
-    return <AdminPanel onExitAdmin={handleExitAdmin} />;
+    return <AdminPanel onExitAdmin={handleExitAdmin} authRole={authRole} />;
   }
 
   // Jika di root URL (/) tanpa slug klien, tampilkan Landing Page Katalog & Harga
