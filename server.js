@@ -103,7 +103,16 @@ const initDatabase = async () => {
       // Kolom sudah ada
     }
 
-    // 4. Backward Compatibility & Sinkronisasi data lama dari tabel invitation_settings
+    // 4. Tabel Pengaturan Platform / Landing Page Komersial
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS platform_settings (
+        id VARCHAR(50) PRIMARY KEY,
+        data LONGTEXT NOT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    // 5. Backward Compatibility & Sinkronisasi data lama dari tabel invitation_settings
     try {
       const [oldRows] = await db.query(`SELECT data FROM invitation_settings WHERE id = 'main' LIMIT 1`);
       if (oldRows && oldRows.length > 0) {
@@ -119,7 +128,7 @@ const initDatabase = async () => {
       // Abaikan jika tabel lama belum ada
     }
 
-    console.log('✅ Seluruh tabel database multi-undangan (invitations, wishes, guests) siap digunakan.');
+    console.log('✅ Seluruh tabel database multi-undangan (invitations, wishes, guests, platform_settings) siap digunakan.');
   } catch (err) {
     console.error('⚠️ Peringatan database:', err.message);
   }
@@ -152,6 +161,39 @@ app.get('/api/invitations', async (req, res) => {
     const db = getPool();
     const [rows] = await db.query('SELECT id, slug, title, theme_id, created_at, updated_at FROM invitations ORDER BY updated_at DESC');
     return res.json({ success: true, count: rows.length, invitations: rows });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// 2b. Pengaturan Landing Page & Komersial (Katalog, Harga, Kontak WA, Hero)
+app.get('/api/platform/settings', async (req, res) => {
+  try {
+    const db = getPool();
+    const [rows] = await db.query('SELECT data FROM platform_settings WHERE id = "landing" LIMIT 1');
+    if (rows && rows.length > 0) {
+      const data = typeof rows[0].data === 'string' ? JSON.parse(rows[0].data) : rows[0].data;
+      return res.json({ success: true, settings: data });
+    }
+    return res.json({ success: true, settings: null });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/platform/settings', async (req, res) => {
+  try {
+    const db = getPool();
+    const payload = req.body.settings || req.body;
+    const jsonStr = typeof payload === 'string' ? payload : JSON.stringify(payload);
+
+    await db.query(`
+      INSERT INTO platform_settings (id, data, updated_at)
+      VALUES ('landing', ?, CURRENT_TIMESTAMP)
+      ON DUPLICATE KEY UPDATE data = VALUES(data), updated_at = CURRENT_TIMESTAMP
+    `, [jsonStr]);
+
+    return res.json({ success: true, message: 'Pengaturan Landing Page berhasil disimpan!' });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

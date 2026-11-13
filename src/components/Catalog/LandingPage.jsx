@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Sparkles, Heart, Smartphone, Send, MessageSquare, Gift, Music, 
   CheckCircle2, ArrowRight, ExternalLink, Shield, Star, HelpCircle, 
@@ -6,21 +6,37 @@ import {
 } from 'lucide-react';
 import { FadeIn, ZoomIn, Floating } from '../common/MotionWrapper';
 import { themes } from '../../data/themes';
+import { defaultLandingSettings } from '../../data/defaultLandingSettings';
+import { fetchPlatformSettings } from '../../services/apiService';
 
 export const LandingPage = ({ onSelectSlug, onOpenAdmin }) => {
+  const [platformConfig, setPlatformConfig] = useState(defaultLandingSettings);
   const [selectedThemePreview, setSelectedThemePreview] = useState(null);
   const [searchSlug, setSearchSlug] = useState('');
 
-  // Nomor WA Admin untuk pemesanan (bisa disesuaikan pengguna)
-  const WA_NUMBER = "6281234567890"; // Format internasional tanpa tanda +
+  useEffect(() => {
+    fetchPlatformSettings().then(remote => {
+      if (remote) {
+        setPlatformConfig(prev => ({
+          ...prev,
+          ...remote,
+          pricingPackages: remote.pricingPackages || prev.pricingPackages,
+          faqs: remote.faqs || prev.faqs
+        }));
+      }
+    });
+  }, []);
+
+  // Nomor WA Admin untuk pemesanan (diambil dari database platform_settings)
+  const waNumber = platformConfig.waNumber || "6281234567890";
   const createWaOrderLink = (packageName, themeName = '') => {
     const text = encodeURIComponent(
-      `Halo Admin, saya tertarik untuk memesan Undangan Digital Website.\n\n` +
+      `Halo Admin ${platformConfig.brandName || 'IpiInvite'}, saya tertarik untuk memesan Undangan Digital Website.\n\n` +
       `📦 Paket: ${packageName}\n` +
       (themeName ? `🎨 Pilihan Tema: ${themeName}\n` : '') +
       `Mohon info langkah selanjutnya dan form pengisian data mempelai ya. Terima kasih!`
     );
-    return `https://wa.me/${WA_NUMBER}?text=${text}`;
+    return `https://wa.me/${waNumber}?text=${text}`;
   };
 
   const themeList = [
@@ -86,55 +102,8 @@ export const LandingPage = ({ onSelectSlug, onOpenAdmin }) => {
     }
   ];
 
-  const pricingPackages = [
-    {
-      name: "Paket Hemat (Silver)",
-      price: "49.000",
-      popular: false,
-      features: [
-        "Masa Aktif 1 Bulan",
-        "Pilihan 1 Tema Favorit",
-        "Personalisasi Nama Tamu (?to=)",
-        "Background Musik Latar Romantis",
-        "Hitung Mundur Acara (Countdown)",
-        "Maksimal 10 Foto Galeri",
-        "Kolom Doa & Ucapan Tamu",
-        "Integrasi Google Maps Lokasi"
-      ]
-    },
-    {
-      name: "Paket Populer (Gold)",
-      price: "79.000",
-      popular: true,
-      features: [
-        "Masa Aktif 6 Bulan",
-        "Bebas Ganti Semua 6 Tema Eksklusif",
-        "Personalisasi Nama Tamu Tanpa Batas",
-        "Kirim WhatsApp Otomatis 1-Klik",
-        "Fitur Amplop Digital & QRIS",
-        "Salin Nomor Rekening 1-Klik",
-        "Galeri Foto Tanpa Batas + Video",
-        "Cerita Perjalanan Cinta (Timeline)",
-        "Kolom Ucapan & Balas Ucapan Tamu",
-        "Integrasi Google Calendar"
-      ]
-    },
-    {
-      name: "Paket Eksklusif (Platinum)",
-      price: "99.000",
-      popular: false,
-      features: [
-        "Masa Aktif SELAMANYA",
-        "Semua Fitur di Paket Gold",
-        "Fitur Check-in Tamu QR Code",
-        "Prioritas Pengerjaan 1x24 Jam Selesai",
-        "Revisi Sepuasnya Sampai Hari H",
-        "Akses Panel Pengelola Mandiri",
-        "Bebas Custom Lagu Favorit Sendiri",
-        "Customer Service VIP WhatsApp"
-      ]
-    }
-  ];
+  const pricingPackages = platformConfig.pricingPackages || defaultLandingSettings.pricingPackages;
+  const faqs = platformConfig.faqs || defaultLandingSettings.faqs;
 
   const handleOpenDemo = (slug) => {
     window.location.href = `/${slug}?to=Selly`;
@@ -159,10 +128,10 @@ export const LandingPage = ({ onSelectSlug, onOpenAdmin }) => {
             </div>
             <div>
               <span className="font-serif-heading font-extrabold text-lg sm:text-xl text-stone-900 tracking-tight">
-                Ipi<span className="text-[#8C533C]">Invite</span>
+                {platformConfig.brandName || 'IpiInvite'}
               </span>
               <p className="text-[10px] text-stone-400 font-medium tracking-widest uppercase">
-                Digital Wedding Platform
+                {platformConfig.brandTagline || 'Digital Wedding Platform'}
               </p>
             </div>
           </div>
@@ -202,19 +171,19 @@ export const LandingPage = ({ onSelectSlug, onOpenAdmin }) => {
           <FadeIn direction="up">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 border border-amber-200 shadow-sm text-xs font-bold text-[#8C533C] uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5 text-amber-600 animate-spin" />
-              <span>Platform Undangan Digital Modern & Full Animasi</span>
+              <span>{platformConfig.heroBadge || 'Platform Undangan Digital Modern & Full Animasi'}</span>
             </div>
           </FadeIn>
 
           <FadeIn direction="up" delay={0.1}>
             <h1 className="font-serif-heading text-4xl sm:text-6xl font-extrabold text-stone-900 tracking-tight leading-[1.15]">
-              Bagikan Momen Bahagiamu dengan Undangan Digital Menawan
+              {platformConfig.heroTitle || 'Bagikan Momen Bahagiamu dengan Undangan Digital Menawan'}
             </h1>
           </FadeIn>
 
           <FadeIn direction="up" delay={0.2}>
             <p className="text-base sm:text-lg text-stone-600 max-w-2xl mx-auto leading-relaxed">
-              Buat undangan online interaktif dengan musik romantis, efek animasi scroll 60 FPS, RSVP realtime, dan bagikan ke ribuan tamu langsung melalui WhatsApp cukup dengan 1 klik.
+              {platformConfig.heroDescription || 'Buat undangan online interaktif dengan musik romantis, efek animasi scroll 60 FPS, RSVP realtime, dan bagikan ke ribuan tamu langsung melalui WhatsApp cukup dengan 1 klik.'}
             </p>
           </FadeIn>
 
@@ -539,24 +508,7 @@ export const LandingPage = ({ onSelectSlug, onOpenAdmin }) => {
           </div>
 
           <div className="space-y-4">
-            {[
-              {
-                q: "Berapa lama proses pembuatan undangan digital?",
-                a: "Proses pengerjaan normal memakan waktu 1x24 jam setelah data mempelai, foto, dan jadwal acara lengkap dikirimkan via WhatsApp."
-              },
-              {
-                q: "Bagaimana cara menyebarkan undangan ke tamu via WhatsApp?",
-                a: "Melalui Panel Pengelola, Anda cukup memasukkan daftar nama dan nomor WhatsApp tamu. Sistem akan otomatis membuatkan link khusus dan teks ucapan yang bisa dikirimkan hanya dalam 1 klik."
-              },
-              {
-                q: "Apakah tema dan lagu bisa diganti setelah undangan jadi?",
-                a: "Tentu saja! Anda memiliki akses ke Panel Pengelola untuk mengganti tema visual, memutar musik berbeda, dan mengedit jadwal acara kapan saja tanpa biaya tambahan."
-              },
-              {
-                q: "Bagaimana jika ada tamu yang belum mengisi konfirmasi hadir (RSVP)?",
-                a: "Anda dapat memantau daftar konfirmasi hadir secara realtime di buku tamu digital, termasuk jumlah tamu yang hadir dan yang berhalangan."
-              }
-            ].map((faq, idx) => (
+            {faqs.map((faq, idx) => (
               <div key={idx} className="p-5 rounded-2xl bg-white border border-stone-200/80 space-y-2 shadow-sm">
                 <h4 className="font-serif-heading font-bold text-sm text-stone-900 flex items-center gap-2">
                   <HelpCircle className="w-4 h-4 text-[#8C533C]" />
@@ -577,7 +529,7 @@ export const LandingPage = ({ onSelectSlug, onOpenAdmin }) => {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
           <div className="space-y-1">
             <p className="font-serif-heading text-base font-bold text-white">
-              Ipi<span className="text-[#8C533C]">Invite</span> — Undangan Pernikahan Digital
+              {platformConfig.brandName || 'IpiInvite'} — {platformConfig.brandTagline || 'Undangan Pernikahan Digital'}
             </p>
             <p className="text-[11px] text-stone-500">
               Platform undangan online modern, elegan, dan siap digunakan untuk menyambut hari bahagia.

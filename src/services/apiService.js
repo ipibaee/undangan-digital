@@ -94,3 +94,27 @@ export const fetchAllInvitations = async () => {
     return [];
   }
 };
+
+export const fetchPlatformSettings = async () => {
+  try {
+    const res = await fetch('/api/platform/settings');
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.settings || null;
+  } catch (e) {
+    return null;
+  }
+};
+
+export const savePlatformSettings = async (settings) => {
+  try {
+    const res = await fetch('/api/platform/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ settings })
+    });
+    return res.ok;
+  } catch (e) {
+    return false;
+  }
+};

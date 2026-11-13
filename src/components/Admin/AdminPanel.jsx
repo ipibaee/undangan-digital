@@ -3,7 +3,7 @@ import { useInvitation } from '../../context/InvitationContext';
 import { 
   Users, Calendar, BookHeart, Gift, Palette, MessageSquare, 
   Settings, ExternalLink, ArrowLeft, Shield, Sparkles, Check,
-  CloudUpload, CheckCircle2, RefreshCw, FolderHeart
+  CloudUpload, CheckCircle2, RefreshCw, FolderHeart, LayoutDashboard
 } from 'lucide-react';
 import { GuestBookManager } from './GuestBookManager';
 import { CoupleEditor } from './CoupleEditor';
@@ -14,6 +14,7 @@ import { ThemeMusicEditor } from './ThemeMusicEditor';
 import { WishesModerator } from './WishesModerator';
 import { BackupSettings } from './BackupSettings';
 import { ClientInvitationManager } from './ClientInvitationManager';
+import { LandingPageEditor } from './LandingPageEditor';
 
 export const AdminPanel = ({ onExitAdmin }) => {
   const { data, dbStatus, saveToCloudNow, isSavingCloud, lastSavedCloud, currentSlug } = useInvitation();
@@ -35,6 +36,7 @@ export const AdminPanel = ({ onExitAdmin }) => {
   const tabs = [
     { id: 'buku-tamu', label: 'Buku Tamu & Sebar WA', icon: Users, badge: 'Utama' },
     { id: 'kelola-klien', label: 'Semua Undangan Klien', icon: FolderHeart, badge: 'Bisnis' },
+    { id: 'pengaturan-landing', label: 'Web Utama & Paket Harga', icon: LayoutDashboard, badge: 'Komersial' },
     { id: 'ucapan', label: 'Balas Ucapan Tamu', icon: MessageSquare, badge: unrepliedCount > 0 ? `${unrepliedCount} Baru` : null, count: unrepliedCount === 0 ? data.wishes?.length : undefined },
     { id: 'mempelai', label: 'Profil Mempelai', icon: Users },
     { id: 'acara', label: 'Jadwal & Lokasi', icon: Calendar },
@@ -160,6 +162,7 @@ export const AdminPanel = ({ onExitAdmin }) => {
           <div className="p-6 sm:p-8 rounded-3xl bg-stone-900/60 border border-stone-800 shadow-xl backdrop-blur-sm">
             {activeTab === 'buku-tamu' && <GuestBookManager />}
             {activeTab === 'kelola-klien' && <ClientInvitationManager />}
+            {activeTab === 'pengaturan-landing' && <LandingPageEditor />}
             {activeTab === 'mempelai' && <CoupleEditor />}
             {activeTab === 'acara' && <EventEditor />}
             {activeTab === 'cerita-galeri' && <StoryGalleryEditor />}
