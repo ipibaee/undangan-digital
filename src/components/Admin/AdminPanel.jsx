@@ -15,7 +15,7 @@ import { WishesModerator } from './WishesModerator';
 import { BackupSettings } from './BackupSettings';
 
 export const AdminPanel = ({ onExitAdmin }) => {
-  const { data, dbStatus, saveToCloudNow, isSavingCloud, lastSavedCloud } = useInvitation();
+  const { data, dbStatus, saveToCloudNow, isSavingCloud, lastSavedCloud, currentSlug } = useInvitation();
   const [activeTab, setActiveTab] = useState('buku-tamu');
   const [saveToast, setSaveToast] = useState(null);
 
@@ -56,10 +56,13 @@ export const AdminPanel = ({ onExitAdmin }) => {
             <h1 className="text-sm sm:text-base font-bold text-white flex items-center gap-1.5 font-serif-heading">
               <span>Panel Pengelola</span>
               <span className="text-xs text-amber-400 font-normal">({data.couple?.groom?.nickName} & {data.couple?.bride?.nickName})</span>
+              <span className="px-2 py-0.5 rounded text-[11px] bg-stone-800 text-stone-300 font-mono">
+                /{currentSlug || 'default'}
+              </span>
             </h1>
             <p className="text-[11px] text-stone-400 flex items-center gap-1.5">
               <span className={`w-2 h-2 rounded-full ${dbStatus.connected ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-              <span>{dbStatus.connected ? 'Terhubung Database Cloud (Neon)' : 'Penyimpanan Lokal'}</span>
+              <span>{dbStatus.connected ? 'Terhubung Database VPS (MySQL)' : 'Penyimpanan Lokal'}</span>
               {lastSavedCloud && <span className="text-emerald-400 font-mono text-[10px]">• Tersimpan {lastSavedCloud}</span>}
             </p>
           </div>
@@ -74,7 +77,7 @@ export const AdminPanel = ({ onExitAdmin }) => {
             className={`px-3.5 py-2 rounded-xl text-white font-semibold text-xs tracking-wide flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer ${
               saveToast ? 'bg-emerald-600' : 'bg-emerald-700 hover:bg-emerald-600'
             }`}
-            title="Simpan data ke server cloud Neon agar langsung tampil di HP dan semua tamu"
+            title="Simpan data ke server VPS MySQL agar langsung tampil di semua tamu"
           >
             {isSavingCloud ? (
               <>

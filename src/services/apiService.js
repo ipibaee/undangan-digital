@@ -1,5 +1,5 @@
 /**
- * API Service for Neon PostgreSQL backend (with graceful offline fallback)
+ * API Service for MySQL backend with Multi-Tenant / Slug support
  */
 
 export const checkDbStatus = async () => {
@@ -12,9 +12,9 @@ export const checkDbStatus = async () => {
   }
 };
 
-export const fetchRemoteData = async () => {
+export const fetchRemoteData = async (slug = 'default') => {
   try {
-    const res = await fetch('/api/invitation');
+    const res = await fetch(`/api/invitation/${slug}`);
     if (!res.ok) return null;
     const json = await res.json();
     return json.data || null;
@@ -23,12 +23,12 @@ export const fetchRemoteData = async () => {
   }
 };
 
-export const saveRemoteData = async (data) => {
+export const saveRemoteData = async (data, slug = 'default') => {
   try {
-    const res = await fetch('/api/invitation', {
+    const res = await fetch(`/api/invitation/${slug}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      body: JSON.stringify({ slug, data })
     });
     return res.ok;
   } catch (e) {
@@ -36,9 +36,9 @@ export const saveRemoteData = async (data) => {
   }
 };
 
-export const fetchRemoteWishes = async () => {
+export const fetchRemoteWishes = async (slug = 'default') => {
   try {
-    const res = await fetch('/api/wishes');
+    const res = await fetch(`/api/wishes?slug=${encodeURIComponent(slug)}`);
     if (!res.ok) return null;
     const json = await res.json();
     return json.wishes || null;
@@ -47,12 +47,12 @@ export const fetchRemoteWishes = async () => {
   }
 };
 
-export const submitRemoteWish = async (wish) => {
+export const submitRemoteWish = async (wish, slug = 'default') => {
   try {
     const res = await fetch('/api/wishes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(wish)
+      body: JSON.stringify({ ...wish, slug })
     });
     return res.ok;
   } catch (e) {
@@ -81,5 +81,16 @@ export const deleteRemoteWish = async (id) => {
     return res.ok;
   } catch (e) {
     return false;
+  }
+};
+
+export const fetchAllInvitations = async () => {
+  try {
+    const res = await fetch('/api/invitations');
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.invitations || [];
+  } catch (e) {
+    return [];
   }
 };

@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { InvitationProvider } from './context/InvitationContext';
+import { InvitationProvider, useInvitation } from './context/InvitationContext';
 import { InvitationView } from './components/Invitation/InvitationView';
 import { AdminPanel } from './components/Admin/AdminPanel';
 import { AdminAuth } from './components/Admin/AdminAuth';
 
 function AppContent() {
+  const { currentSlug } = useInvitation();
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Deteksi route: cek apakah membuka path /admin atau query legacy ?panel=admin
+  // Deteksi route: cek apakah membuka path /admin, /:slug/admin atau query legacy ?panel=admin
   useEffect(() => {
     const syncRouteFromUrl = () => {
+      const path = window.location.pathname;
       const params = new URLSearchParams(window.location.search);
-      const isPathAdmin = window.location.pathname === '/admin' || window.location.pathname.startsWith('/admin');
+      const isPathAdmin = path === '/admin' || path.endsWith('/admin');
       const isParamAdmin = params.get('panel') === 'admin';
       setIsAdminMode(isPathAdmin || isParamAdmin);
     };
@@ -24,14 +26,14 @@ function AppContent() {
 
   const handleOpenAdmin = () => {
     setIsAdminMode(true);
-    // Navigasi URL bersih ke /admin
-    window.history.pushState({}, '', '/admin');
+    const targetUrl = currentSlug && currentSlug !== 'default' ? `/${currentSlug}/admin` : '/admin';
+    window.history.pushState({}, '', targetUrl);
   };
 
   const handleExitAdmin = () => {
     setIsAdminMode(false);
-    // Kembali ke halaman utama /
-    window.history.pushState({}, '', '/');
+    const targetUrl = currentSlug && currentSlug !== 'default' ? `/${currentSlug}` : '/';
+    window.history.pushState({}, '', targetUrl);
   };
 
   if (isAdminMode) {

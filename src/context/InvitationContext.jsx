@@ -6,23 +6,24 @@ import {
   submitRemoteWish, replyRemoteWish, deleteRemoteWish, fetchRemoteWishes 
 } from '../services/apiService';
 
-const STORAGE_KEY = 'undangan_digital_data_v1';
+export const getSlugFromUrl = () => {
+  const path = window.location.pathname.replace(/^\/+|\/+$/g, '');
+  if (!path) return 'default';
+  const parts = path.split('/');
+  if (parts[0] === 'admin') return 'default';
+  return parts[0] || 'default';
+};
 
 const InvitationContext = createContext(null);
 
-const isTemplateData = (d) => {
-  if (!d || !d.couple) return true;
-  const isDefaultGroom = d.couple?.groom?.fullName === "Justin Pratama, S.Kom." && d.couple?.groom?.nickName === "Justin";
-  const isDefaultBride = d.couple?.bride?.fullName === "Fransisca Anggraini, S.E." && d.couple?.bride?.nickName === "Sisca";
-  const isDefaultAddress = d.events?.akad?.address?.includes("Kebayoran Baru");
-  return Boolean(isDefaultGroom && isDefaultBride && isDefaultAddress);
-};
-
 export const InvitationProvider = ({ children }) => {
+  const [currentSlug, setCurrentSlug] = useState(getSlugFromUrl());
+  const storageKey = `undangan_digital_data_${currentSlug}`;
+
   // Load initial data from localStorage if exists
   const [data, setData] = useState(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(storageKey);
       if (saved) {
         return JSON.parse(saved);
       }
@@ -32,7 +33,7 @@ export const InvitationProvider = ({ children }) => {
     return initialInvitationData;
   });
 
-  // Database status (Neon Tech Serverless Postgres)
+  // Database status (MySQL lokal aaPanel)
   const [dbStatus, setDbStatus] = useState({ connected: false, provider: 'checking' });
   const [isSavingCloud, setIsSavingCloud] = useState(false);
   const [lastSavedCloud, setLastSavedCloud] = useState(null);
@@ -50,20 +51,21 @@ export const InvitationProvider = ({ children }) => {
   // Guest name extracted from URL query (?kpd=... or ?to=...)
   const [guestName, setGuestName] = useState('Tamu Undangan');
 
-  // Manual or on-demand push to Neon cloud
-  const saveToCloudNow = async (explicitData) => {
+  // Push to MySQL Database
+  const saveToCloudNow = async (explicitData, explicitSlug) => {
+    const targetSlug = explicitSlug || currentSlug;
     const payload = explicitData || data;
     setIsSavingCloud(true);
     try {
-      const ok = await saveRemoteData(payload);
+      const ok = await saveRemoteData(payload, targetSlug);
       if (ok) {
         const timeStr = new Date().toLocaleTimeString('id-ID');
         setLastSavedCloud(timeStr);
         setDbStatus(prev => ({ ...prev, connected: true }));
         try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+          localStorage.setItem(`undangan_digital_data_${targetSlug}`, JSON.stringify(payload));
         } catch (e) {}
-        return { success: true, time: timeStr };
+        return { success: true, time: timeStr, slug: targetSlug };
       }
       return { success: false, message: 'Server database gagal menyimpan' };
     } catch (err) {
@@ -72,6 +74,17 @@ export const InvitationProvider = ({ children }) => {
       setIsSavingCloud(false);
     }
   };
+
+  useEffect(() => {
+    const handleUrlChange = () => {
+      const newSlug = getSlugFromUrl();
+      if (newSlug !== currentSlug) {
+        setCurrentSlug(newSlug);
+      }
+    };
+    window.addEventListener('popstate', handleUrlChange);
+    return () => window.removeEventListener('popstate', handleUrlChange);
+  }, [currentSlug]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -85,15 +98,15 @@ export const InvitationProvider = ({ children }) => {
       setIsInitialLoading(false);
     }, 2500);
 
-    // Check Neon Tech cloud database connection
+    // Sync data from MySQL by slug
     const syncCloudDb = async () => {
       try {
         const status = await checkDbStatus();
         setDbStatus(status);
         if (status.connected) {
           const [remoteData, remoteWishes] = await Promise.all([
-            fetchRemoteData(),
-            fetchRemoteWishes()
+            fetchRemoteData(currentSlug),
+            fetchRemoteWishes(currentSlug)
           ]);
 
           let combinedData = remoteData;
@@ -112,7 +125,7 @@ export const InvitationProvider = ({ children }) => {
             }
             setData(combinedData);
             try {
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(combinedData));
+              localStorage.setItem(`undangan_digital_data_${currentSlug}`, JSON.stringify(combinedData));
             } catch (e) {}
           }
         }
@@ -126,7 +139,7 @@ export const InvitationProvider = ({ children }) => {
     syncCloudDb();
 
     return () => clearTimeout(safetyTimer);
-  }, []);
+  }, [currentSlug]);
 
   // Realtime Polling for Wishes & Replies (syncs guest messages and host replies live without refreshing!)
   useEffect(() => {
@@ -134,7 +147,7 @@ export const InvitationProvider = ({ children }) => {
 
     const pollWishes = async () => {
       try {
-        const remoteWishes = await fetchRemoteWishes();
+        const remoteWishes = await fetchRemoteWishes(currentSlug);
         if (remoteWishes && Array.isArray(remoteWishes)) {
           const formatted = remoteWishes.map(w => ({
             id: w.id,
@@ -162,9 +175,9 @@ export const InvitationProvider = ({ children }) => {
     };
 
     pollWishes();
-    const interval = setInterval(pollWishes, 3500);
+    const interval = setInterval(pollWishes, 10000);
     return () => clearInterval(interval);
-  }, [dbStatus.connected]);
+  }, [dbStatus.connected, currentSlug]);
 
   // Save to localStorage whenever data changes + sync to Neon if connected
   useEffect(() => {

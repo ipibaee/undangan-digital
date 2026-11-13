@@ -37,10 +37,13 @@ export const GuestBookManager = () => {
   // Template text
   const currentTemplate = data.whatsapp?.template || '';
 
-  // Get current website base url
+  // Get current website base url (bersih dari /admin dan dukung slug multi-tenant)
   const getGuestUrl = (guestName) => {
-    const origin = window.location.origin + window.location.pathname;
-    return `${origin}?kpd=${encodeURIComponent(guestName)}`;
+    const origin = window.location.origin;
+    let cleanPath = window.location.pathname.replace(/\/admin\/?$/, '');
+    if (!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
+    if (cleanPath === '/') cleanPath = '';
+    return `${origin}${cleanPath}?to=${encodeURIComponent(guestName)}`;
   };
 
   // Generate personalized WhatsApp message for a guest
