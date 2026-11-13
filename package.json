@@ -17,6 +17,7 @@
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
     "express": "^4.22.3",
+    "framer-motion": "^14.13.0",
     "lucide-react": "^1.47.0",
     "mysql2": "^3.24.6",
     "qrcode.react": "^4.2.0",

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useInvitation } from '../../context/InvitationContext';
 import { Image as ImageIcon, Video, X, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import { FloralBadge } from './Ornaments';
+import { FadeIn, ZoomIn } from '../common/MotionWrapper';
 
 export const GallerySection = () => {
   const { data, currentTheme } = useInvitation();
@@ -28,21 +29,23 @@ export const GallerySection = () => {
       <div className="max-w-xl mx-auto space-y-12">
         
         {/* Header */}
-        <div className="text-center space-y-3">
-          <FloralBadge text="Galeri & Video" color={data.meta.accentColor} />
-          <h2 className="font-romantic text-4xl sm:text-5xl" style={{ color: data.meta.accentColor }}>
-            Momen Bahagia
-          </h2>
-          <p className="text-xs sm:text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
-            Potret kebersamaan dan kenangan manis yang kami abadikan dalam bingkai cinta.
-          </p>
-        </div>
+        <FadeIn direction="up">
+          <div className="text-center space-y-3">
+            <FloralBadge text="Galeri & Video" color={data.meta.accentColor} />
+            <h2 className="font-romantic text-4xl sm:text-5xl" style={{ color: data.meta.accentColor }}>
+              Momen Bahagia
+            </h2>
+            <p className="text-xs sm:text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
+              Potret kebersamaan dan kenangan manis yang kami abadikan dalam bingkai cinta.
+            </p>
+          </div>
+        </FadeIn>
 
         {/* Photo Grid */}
         <div className="grid grid-cols-2 gap-3 sm:gap-4">
           {gallery.map((photo, idx) => (
+            <ZoomIn key={photo.id || idx} delay={(idx % 4) * 0.1}>
             <div 
-              key={photo.id || idx}
               onClick={() => openLightbox(idx)}
               className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-md cursor-pointer group bg-stone-200"
             >
@@ -58,6 +61,7 @@ export const GallerySection = () => {
                 </p>
               </div>
             </div>
+            </ZoomIn>
           ))}
         </div>
 

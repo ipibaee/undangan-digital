@@ -2,6 +2,7 @@ import React from 'react';
 import { useInvitation } from '../../context/InvitationContext';
 import { MapPin, Calendar, Clock, Navigation } from 'lucide-react';
 import { FloralBadge, SectionDivider } from './Ornaments';
+import { FadeIn, ZoomIn } from '../common/MotionWrapper';
 
 const resolveMapEmbed = (embedUrl, address, venueName, mapsUrl) => {
   if (embedUrl && typeof embedUrl === 'string') {
@@ -51,20 +52,23 @@ export const EventSection = () => {
       <div className="max-w-xl mx-auto space-y-12">
         
         {/* Header */}
-        <div className="text-center space-y-3">
-          <FloralBadge text="Agenda & Lokasi" color={data.meta.accentColor} />
-          <h2 className="font-romantic text-4xl sm:text-5xl" style={{ color: data.meta.accentColor }}>
-            Rangkaian Acara
-          </h2>
-          <p className="text-xs sm:text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
-            Dengan penuh rasa syukur, kami mengundang kehadiran Bapak/Ibu/Saudara/i dalam rangkaian acara bahagia kami:
-          </p>
-        </div>
+        <FadeIn direction="up">
+          <div className="text-center space-y-3">
+            <FloralBadge text="Agenda & Lokasi" color={data.meta.accentColor} />
+            <h2 className="font-romantic text-4xl sm:text-5xl" style={{ color: data.meta.accentColor }}>
+              Rangkaian Acara
+            </h2>
+            <p className="text-xs sm:text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
+              Dengan penuh rasa syukur, kami mengundang kehadiran Bapak/Ibu/Saudara/i dalam rangkaian acara bahagia kami:
+            </p>
+          </div>
+        </FadeIn>
 
         {/* Event Cards */}
         <div className="space-y-8">
           
           {/* Akad Nikah */}
+          <FadeIn direction="up" delay={0.15}>
           <div className={`p-6 sm:p-8 rounded-3xl ${currentTheme.cardBg} space-y-6 shadow-md`}>
             <div className="text-center space-y-2">
               <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${currentTheme.badgeBg}`}>
@@ -122,8 +126,10 @@ export const EventSection = () => {
               </div>
             )}
           </div>
+          </FadeIn>
 
           {/* Resepsi Pernikahan */}
+          <FadeIn direction="up" delay={0.25}>
           <div className={`p-6 sm:p-8 rounded-3xl ${currentTheme.cardBg} space-y-6 shadow-md`}>
             <div className="text-center space-y-2">
               <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${currentTheme.badgeBg}`}>
@@ -181,6 +187,7 @@ export const EventSection = () => {
               </div>
             )}
           </div>
+          </FadeIn>
 
         </div>
 
