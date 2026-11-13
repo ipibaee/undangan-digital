@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { initialInvitationData } from '../data/defaultData';
+import { initialInvitationData, getPresetDataForSlug } from '../data/defaultData';
 import { themes } from '../data/themes';
 import { 
   checkDbStatus, fetchRemoteData, saveRemoteData, 
@@ -8,17 +8,18 @@ import {
 
 export const getSlugFromUrl = () => {
   const path = window.location.pathname.replace(/^\/+|\/+$/g, '');
-  if (!path) return 'default';
+  if (!path) return ''; // Root path / adalah landing page / katalog
   const parts = path.split('/');
-  if (parts[0] === 'admin') return 'default';
-  return parts[0] || 'default';
+  if (parts[0] === 'admin') return '';
+  return parts[0] || '';
 };
 
 const InvitationContext = createContext(null);
 
 export const InvitationProvider = ({ children }) => {
   const [currentSlug, setCurrentSlug] = useState(getSlugFromUrl());
-  const storageKey = `undangan_digital_data_${currentSlug}`;
+  const effectiveSlug = currentSlug || 'default';
+  const storageKey = `undangan_digital_data_${effectiveSlug}`;
 
   // Load initial data from localStorage if exists
   const [data, setData] = useState(() => {
@@ -30,7 +31,7 @@ export const InvitationProvider = ({ children }) => {
     } catch (e) {
       console.error('Failed reading stored data', e);
     }
-    return initialInvitationData;
+    return getPresetDataForSlug(effectiveSlug);
   });
 
   // Database status (MySQL lokal aaPanel)
@@ -53,7 +54,7 @@ export const InvitationProvider = ({ children }) => {
 
   // Push to MySQL Database
   const saveToCloudNow = async (explicitData, explicitSlug) => {
-    const targetSlug = explicitSlug || currentSlug;
+    const targetSlug = explicitSlug || effectiveSlug;
     const payload = explicitData || data;
     setIsSavingCloud(true);
     try {
@@ -105,29 +106,31 @@ export const InvitationProvider = ({ children }) => {
         setDbStatus(status);
         if (status.connected) {
           const [remoteData, remoteWishes] = await Promise.all([
-            fetchRemoteData(currentSlug),
-            fetchRemoteWishes(currentSlug)
+            fetchRemoteData(effectiveSlug),
+            fetchRemoteWishes(effectiveSlug)
           ]);
 
           let combinedData = remoteData;
-          if (combinedData && combinedData.couple) {
-            if (remoteWishes && Array.isArray(remoteWishes) && remoteWishes.length > 0) {
-              combinedData.wishes = remoteWishes.map(w => ({
-                id: w.id,
-                name: w.name,
-                relation: w.relation,
-                attendance: w.attendance,
-                pax: w.pax,
-                message: w.message,
-                reply: w.reply,
-                createdAt: w.created_at ? new Date(w.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : (w.createdAt || '')
-              }));
-            }
-            setData(combinedData);
-            try {
-              localStorage.setItem(`undangan_digital_data_${currentSlug}`, JSON.stringify(combinedData));
-            } catch (e) {}
+          if (!combinedData || !combinedData.couple) {
+            combinedData = getPresetDataForSlug(effectiveSlug);
           }
+
+          if (remoteWishes && Array.isArray(remoteWishes) && remoteWishes.length > 0) {
+            combinedData.wishes = remoteWishes.map(w => ({
+              id: w.id,
+              name: w.name,
+              relation: w.relation,
+              attendance: w.attendance,
+              pax: w.pax,
+              message: w.message,
+              reply: w.reply,
+              createdAt: w.created_at ? new Date(w.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : (w.createdAt || '')
+            }));
+          }
+          setData(combinedData);
+          try {
+            localStorage.setItem(storageKey, JSON.stringify(combinedData));
+          } catch (e) {}
         }
       } catch (err) {
         setDbStatus({ connected: false, provider: 'local' });
@@ -139,7 +142,7 @@ export const InvitationProvider = ({ children }) => {
     syncCloudDb();
 
     return () => clearTimeout(safetyTimer);
-  }, [currentSlug]);
+  }, [effectiveSlug]);
 
   // Realtime Polling for Wishes & Replies (syncs guest messages and host replies live without refreshing!)
   useEffect(() => {
@@ -147,7 +150,7 @@ export const InvitationProvider = ({ children }) => {
 
     const pollWishes = async () => {
       try {
-        const remoteWishes = await fetchRemoteWishes(currentSlug);
+        const remoteWishes = await fetchRemoteWishes(effectiveSlug);
         if (remoteWishes && Array.isArray(remoteWishes)) {
           const formatted = remoteWishes.map(w => ({
             id: w.id,
@@ -177,7 +180,7 @@ export const InvitationProvider = ({ children }) => {
     pollWishes();
     const interval = setInterval(pollWishes, 10000);
     return () => clearInterval(interval);
-  }, [dbStatus.connected, currentSlug]);
+  }, [dbStatus.connected, effectiveSlug]);
 
   // Save to localStorage whenever data changes + sync to Neon if connected
   useEffect(() => {
@@ -446,6 +449,8 @@ export const InvitationProvider = ({ children }) => {
   return (
     <InvitationContext.Provider
       value={{
+        currentSlug,
+        effectiveSlug,
         data,
         setData,
         dbStatus,

@@ -37,7 +37,7 @@ export const CoupleSection = () => {
                 <div className="absolute inset-0 rounded-full border-2 border-dashed border-stone-400/40 animate-spin-slow" />
                 <div className="w-full h-full p-2">
                   <img 
-                    src={groom.photo} 
+                    src={groom.photo || "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&auto=format&fit=crop&q=80"} 
                     alt={groom.fullName} 
                     className="w-full h-full rounded-full object-cover shadow-lg border-2 border-white"
                   />
@@ -95,7 +95,7 @@ export const CoupleSection = () => {
               <div className="absolute inset-0 rounded-full border-2 border-dashed border-stone-400/40 animate-spin-slow" />
               <div className="w-full h-full p-2">
                 <img 
-                  src={bride.photo} 
+                  src={bride.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80"} 
                   alt={bride.fullName} 
                   className="w-full h-full rounded-full object-cover shadow-lg border-2 border-white"
                 />

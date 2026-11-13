@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { InvitationProvider, useInvitation } from './context/InvitationContext';
 import { InvitationView } from './components/Invitation/InvitationView';
+import { LandingPage } from './components/Catalog/LandingPage';
 import { AdminPanel } from './components/Admin/AdminPanel';
 import { AdminAuth } from './components/Admin/AdminAuth';
 
@@ -48,6 +49,19 @@ function AppContent() {
     return <AdminPanel onExitAdmin={handleExitAdmin} />;
   }
 
+  // Jika di root URL (/) tanpa slug klien, tampilkan Landing Page Katalog & Harga
+  if (!currentSlug) {
+    return (
+      <LandingPage 
+        onSelectSlug={(slug) => {
+          window.location.href = `/${slug}`;
+        }}
+        onOpenAdmin={handleOpenAdmin}
+      />
+    );
+  }
+
+  // Jika URL memiliki slug (contoh: /febri-ananta atau /ipi-seli), tampilkan undangan klien
   return <InvitationView onOpenAdmin={handleOpenAdmin} />;
 }
 

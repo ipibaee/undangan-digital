@@ -13,7 +13,7 @@ export const CoverSplash = () => {
       {/* Background Image with Parallax-like feel & Overlay */}
       <div 
         className="absolute inset-0 bg-cover bg-center scale-105 transition-transform duration-1000 ease-out"
-        style={{ backgroundImage: `url('${data.couple.coverImage}')` }}
+        style={{ backgroundImage: `url('${data.couple.coverImage || "https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&auto=format&fit=crop&q=80"}')` }}
       />
       <div className={`absolute inset-0 ${currentTheme.coverOverlay} backdrop-blur-[2px]`} />
 

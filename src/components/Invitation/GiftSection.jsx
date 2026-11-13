@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useInvitation } from '../../context/InvitationContext';
 import { Gift, CreditCard, Copy, Check, MapPin, QrCode, ExternalLink } from 'lucide-react';
 import { FloralBadge } from './Ornaments';
+import { FadeIn, ZoomIn } from '../common/MotionWrapper';
 
 export const GiftSection = () => {
   const { data, currentTheme } = useInvitation();
@@ -22,59 +23,62 @@ export const GiftSection = () => {
       <div className="max-w-xl mx-auto space-y-12">
         
         {/* Header */}
-        <div className="text-center space-y-3">
-          <FloralBadge text="Tanda Kasih" color={data.meta.accentColor} />
-          <h2 className="font-romantic text-4xl sm:text-5xl" style={{ color: data.meta.accentColor }}>
-            {gifts.title || 'Titip Kado & Amplop Digital'}
-          </h2>
-          <p className="text-xs sm:text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
-            {gifts.description}
-          </p>
-        </div>
+        <FadeIn direction="up">
+          <div className="text-center space-y-3">
+            <FloralBadge text="Tanda Kasih" color={data.meta.accentColor} />
+            <h2 className="font-romantic text-4xl sm:text-5xl" style={{ color: data.meta.accentColor }}>
+              {gifts.title || 'Titip Kado & Amplop Digital'}
+            </h2>
+            <p className="text-xs sm:text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
+              {gifts.description}
+            </p>
+          </div>
+        </FadeIn>
 
         {/* Bank & E-Wallet Accounts */}
         <div className="space-y-4">
-          {gifts.accounts?.map((acc) => (
-            <div 
-              key={acc.id}
-              className={`p-6 rounded-3xl ${currentTheme.cardBg} flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm transition-all duration-300 hover:shadow-md`}
-            >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <CreditCard className="w-4 h-4 text-amber-700" />
-                  <span className="font-bold text-stone-800 text-sm tracking-wide">
-                    {acc.bankName}
-                  </span>
-                </div>
-                <p className="font-mono text-lg font-bold text-stone-900 tracking-wider">
-                  {acc.accountNumber}
-                </p>
-                <p className="text-xs text-stone-500 font-medium">
-                  a.n. {acc.accountHolder}
-                </p>
-              </div>
-
-              <button
-                onClick={() => handleCopy(acc.accountNumber, acc.id)}
-                className={`px-4 py-2 rounded-xl text-xs font-semibold tracking-wider flex items-center justify-center gap-1.5 self-start sm:self-center transition-all ${
-                  copiedId === acc.id 
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : currentTheme.secondaryBtn
-                }`}
+          {gifts.accounts?.map((acc, index) => (
+            <FadeIn key={acc.id} direction="up" delay={index * 0.15}>
+              <div 
+                className={`p-6 rounded-3xl ${currentTheme.cardBg} flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm transition-all duration-300 hover:shadow-md`}
               >
-                {copiedId === acc.id ? (
-                  <>
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Tersalin!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Salin No. Rekening</span>
-                  </>
-                )}
-              </button>
-            </div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-amber-700" />
+                    <span className="font-bold text-stone-800 text-sm tracking-wide">
+                      {acc.bankName}
+                    </span>
+                  </div>
+                  <p className="font-mono text-lg font-bold text-stone-900 tracking-wider">
+                    {acc.accountNumber}
+                  </p>
+                  <p className="text-xs text-stone-500 font-medium">
+                    a.n. {acc.accountHolder}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => handleCopy(acc.accountNumber, acc.id)}
+                  className={`px-4 py-2 rounded-xl text-xs font-semibold tracking-wider flex items-center justify-center gap-1.5 self-start sm:self-center transition-all cursor-pointer ${
+                    copiedId === acc.id 
+                      ? 'bg-emerald-600 text-white shadow-sm'
+                      : currentTheme.secondaryBtn
+                  }`}
+                >
+                  {copiedId === acc.id ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Tersalin!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Salin No. Rekening</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </FadeIn>
           ))}
         </div>
 

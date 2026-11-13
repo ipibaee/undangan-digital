@@ -3,6 +3,7 @@ import { useInvitation } from '../../context/InvitationContext';
 import { MessageSquare, Send, CheckCircle2, HelpCircle, XCircle, User, Users, HeartHandshake, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { FloralBadge } from './Ornaments';
+import { FadeIn } from '../common/MotionWrapper';
 
 export const RsvpSection = () => {
   const { data, currentTheme, guestName, addWish } = useInvitation();
@@ -75,19 +76,22 @@ export const RsvpSection = () => {
       <div className="max-w-xl mx-auto space-y-12">
         
         {/* Header */}
-        <div className="text-center space-y-3">
-          <FloralBadge text="RSVP & Doa Restu" color={data.meta.accentColor} />
-          <h2 className="font-romantic text-4xl sm:text-5xl" style={{ color: data.meta.accentColor }}>
-            Ucapan & Konfirmasi Kehadiran
-          </h2>
-          <p className="text-xs sm:text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
-            Kehadiran dan doa restu Bapak/Ibu/Saudara/i merupakan kado terindah bagi kami berdua.
-          </p>
-        </div>
+        <FadeIn direction="up">
+          <div className="text-center space-y-3">
+            <FloralBadge text="RSVP & Doa Restu" color={data.meta.accentColor} />
+            <h2 className="font-romantic text-4xl sm:text-5xl" style={{ color: data.meta.accentColor }}>
+              Ucapan & Konfirmasi Kehadiran
+            </h2>
+            <p className="text-xs sm:text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
+              Kehadiran dan doa restu Bapak/Ibu/Saudara/i merupakan kado terindah bagi kami berdua.
+            </p>
+          </div>
+        </FadeIn>
 
         {/* RSVP Form Card */}
-        <div className={`p-6 sm:p-8 rounded-3xl ${currentTheme.cardBg} space-y-6 shadow-md`}>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <FadeIn direction="up" delay={0.15}>
+          <div className={`p-6 sm:p-8 rounded-3xl ${currentTheme.cardBg} space-y-6 shadow-md`}>
+            <form onSubmit={handleSubmit} className="space-y-4">
             
             {/* Name Input */}
             <div>
@@ -197,6 +201,7 @@ export const RsvpSection = () => {
             )}
           </form>
         </div>
+      </FadeIn>
 
         {/* Wishes Feed List */}
         <div className="space-y-4">

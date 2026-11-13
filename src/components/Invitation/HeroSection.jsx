@@ -30,7 +30,7 @@ export const HeroSection = () => {
             <div className="relative mx-auto w-64 h-80 sm:w-72 sm:h-96 rounded-t-full rounded-b-3xl overflow-hidden shadow-2xl p-2 bg-gradient-to-b from-[#e8dfd2] to-transparent border border-white/60">
               <div className="w-full h-full rounded-t-full rounded-b-2xl overflow-hidden relative group">
                 <img 
-                  src={data.couple.heroImage} 
+                  src={data.couple.heroImage || "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop&q=80"} 
                   alt="Mempelai" 
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
