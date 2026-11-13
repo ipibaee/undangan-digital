@@ -43,9 +43,10 @@ export const LandingPage = ({ onSelectSlug, onOpenAdmin }) => {
     {
       id: "punakawan-terracotta",
       name: "Punakawan Terracotta & Warm Sand",
-      badge: "Best Seller / Referensi",
+      badge: "Best Seller (Febri-Ananta)",
       badgeColor: "bg-amber-100 text-amber-800 border-amber-300",
-      description: "Nuansa earth-tone terakota hangat dan krem pasir terinspirasi dari Punakawan Digital. Elegan, modern, dan penuh kehangatan.",
+      layoutTag: "Frame Melingkar Wreath",
+      description: "Model layout Punakawan Digital asli: Frame foto lingkaran ber-wreath floral, tirai cover slide ke atas, amplop ATM debit realistis.",
       colorHex: "#8C533C",
       demoSlug: "febri-ananta",
       previewBg: "from-[#8C533C]/20 via-[#FBF9F5] to-[#B77B63]/20"
@@ -53,52 +54,57 @@ export const LandingPage = ({ onSelectSlug, onOpenAdmin }) => {
     {
       id: "sage-botanical",
       name: "Earthy Botanical Sage",
-      badge: "Trending 2026",
+      badge: "Trending Nature",
       badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
-      description: "Harmonisasi warna hijau sage daun zaitun dengan nuansa alam yang menyejukkan hati dan berkesan sangat bersih.",
+      layoutTag: "Frame Melingkar Wreath",
+      description: "Model layout Punakawan dengan palet warna hijau sage daun zaitun segar dan ornamen botani yang menyejukkan hati.",
       colorHex: "#657D64",
       demoSlug: "demo-sage",
       previewBg: "from-[#657D64]/20 via-[#F5F7F4] to-[#8FA88E]/20"
     },
     {
-      id: "royal-gold",
-      name: "Royal Midnight & Gold",
-      badge: "Luxury Dark",
-      badgeColor: "bg-yellow-100 text-yellow-800 border-yellow-300",
-      description: "Kemewahan magis tema gelap malam berpadu taburan aksen emas murni. Memberikan impresi eksklusif dan glamor.",
-      colorHex: "#D4AF37",
-      demoSlug: "demo-royal",
-      previewBg: "from-[#0D1217] via-[#151C24] to-[#252210]"
-    },
-    {
       id: "champagne-floral",
-      name: "Classic Floral Champagne",
-      badge: "Timeless Classic",
+      name: "Modern Arch Champagne",
+      badge: "Modern Architecture",
       badgeColor: "bg-stone-200 text-stone-800 border-stone-300",
-      description: "Keanggunan klasik warna krem keemasan berhias ornamen botani floral lembut. Pilihan tepat untuk konsep pernikahan formal.",
+      layoutTag: "Frame Kubah Lengkung (Tall Arch)",
+      description: "Model layout Modern Arch: Frame foto lengkung kubah tinggi arsitektural dipadu tipografi editorial krem keemasan yang sangat bersih dan estetik.",
       colorHex: "#928573",
       demoSlug: "demo-champagne",
       previewBg: "from-[#FAF7F2] via-[#F4EFE8] to-[#928573]/20"
     },
     {
       id: "blush-rose",
-      name: "Romantic Blush & Dusty Rose",
-      badge: "Most Romantic",
+      name: "Modern Arch Blush & Dusty Rose",
+      badge: "Romantic Arch",
       badgeColor: "bg-rose-100 text-rose-800 border-rose-300",
-      description: "Sentuhan romansa bunga mawar berpadu warna pink pastel yang manis dan penuh kehangatan cinta.",
+      layoutTag: "Frame Kubah Lengkung (Tall Arch)",
+      description: "Model layout Modern Arch dengan nuansa merah muda lembut, tipografi anggun, dan sentuhan modern minimalis romantis.",
       colorHex: "#BD7878",
       demoSlug: "demo-rose",
       previewBg: "from-[#FCF8F8] via-[#FDF0F0] to-[#BD7878]/20"
     },
     {
+      id: "royal-gold",
+      name: "Royal Midnight & Gold",
+      badge: "Luxury Dark Edition",
+      badgeColor: "bg-yellow-100 text-yellow-800 border-yellow-300",
+      layoutTag: "Frame Diamond Shimmer Gold",
+      description: "Model layout Royal Luxury: Frame foto diamond/rhombus bertabur aksen emas, background malam gelap berbintang, dan ATM card black-gold.",
+      colorHex: "#D4AF37",
+      demoSlug: "demo-royal",
+      previewBg: "from-[#0D1217] via-[#151C24] to-[#252210]"
+    },
+    {
       id: "emerald-luxury",
-      name: "Emerald & Vintage Gold",
-      badge: "Royal Vintage",
+      name: "Emerald & Royal Vintage Gold",
+      badge: "Regal Elegance",
       badgeColor: "bg-teal-100 text-teal-800 border-teal-300",
-      description: "Pesona hijau zamrud klasik dipadu sentuhan emas anggun berkelas untuk nuansa pernikahan agung dan mempesona.",
+      layoutTag: "Frame Diamond Shimmer Gold",
+      description: "Model layout Royal Luxury dengan kemewahan hijau zamrud ningrat berpadu sentuhan emas murni yang mempesona.",
       colorHex: "#2D5A43",
       demoSlug: "demo-emerald",
-      previewBg: "from-[#F4F7F5] via-[#E5EFE9] to-[#2D5A43]/20"
+      previewBg: "from-[#0C1813] via-[#13241D] to-[#2D5A43]/20"
     }
   ];
 
@@ -276,6 +282,11 @@ export const LandingPage = ({ onSelectSlug, onOpenAdmin }) => {
                   {/* Theme Info */}
                   <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
                     <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 border border-stone-200">
+                          {item.layoutTag}
+                        </span>
+                      </div>
                       <h3 className="font-serif-heading text-lg font-bold text-stone-900 group-hover:text-[#8C533C] transition-colors">
                         {item.name}
                       </h3>

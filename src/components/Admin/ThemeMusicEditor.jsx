@@ -2,16 +2,19 @@ import React, { useState, useRef } from 'react';
 import { useInvitation } from '../../context/InvitationContext';
 import { 
   Palette, Music, Sparkles, Check, Play, Volume2, Upload, 
-  Disc, Layers, Sliders, Eye, RefreshCw 
+  Disc, Layers, Sliders, Eye, RefreshCw, LayoutTemplate, Crown, Circle, Compass
 } from 'lucide-react';
-import { themes } from '../../data/themes';
+import { themes, templateLayouts } from '../../data/themes';
 import { readAudioFile } from '../../utils/fileUploadHelper';
 
 export const ThemeMusicEditor = () => {
   const { data, updateField, isPlaying, toggleMusic } = useInvitation();
-  const activeThemeKey = data.meta.activeTheme || 'champagne-floral';
+  const activeThemeKey = data.meta.activeTheme || 'punakawan-terracotta';
   const music = data.music || {};
   const meta = data.meta || {};
+  
+  // Template layout aktif (punakawan | modern-arch | royal-luxury)
+  const activeLayout = meta.templateLayout || themes[activeThemeKey]?.layout || 'punakawan';
 
   const audioFileInputRef = useRef(null);
   const [isUploadingAudio, setIsUploadingAudio] = useState(false);
@@ -23,7 +26,7 @@ export const ThemeMusicEditor = () => {
   const gradientColor1 = meta.gradientColor1 || '#fdfbf7';
   const gradientColor2 = meta.gradientColor2 || '#f4ece1';
   const showFloral = meta.showFloralOrnaments !== false;
-  const floralAccentColor = meta.accentColor || '#928573';
+  const floralAccentColor = meta.accentColor || '#8C533C';
 
   // Music Presets
   const musicPresets = [
@@ -128,23 +131,96 @@ export const ThemeMusicEditor = () => {
   return (
     <div className="space-y-8 text-stone-100">
       
-      {/* 1. Theme Template Selection */}
+      {/* 1. Template Layout / Model Struktur Desain (BENTUK BEDA) */}
       <div className="p-6 rounded-2xl bg-stone-800 border border-stone-700 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-bold text-sm text-white flex items-center gap-2">
-            <Palette className="w-4 h-4 text-amber-500" />
-            <span>Pilihan Template Utama</span>
-          </h3>
-          <span className="text-xs text-stone-400">4 Pilihan Desain</span>
+          <div>
+            <h3 className="font-bold text-sm text-white flex items-center gap-2">
+              <LayoutTemplate className="w-4 h-4 text-amber-500" />
+              <span>Model Struktur & Bentuk Template (Layout Unik)</span>
+            </h3>
+            <p className="text-xs text-stone-400 mt-0.5">
+              Pilih model arsitektur layout. Setiap template memiliki bentuk frame foto, ornamen, dan struktur yang berbeda.
+            </p>
+          </div>
+          <span className="text-xs px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30">
+            3 Desain Layout
+          </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+          {templateLayouts.map((tmpl) => {
+            const isSelected = activeLayout === tmpl.id;
+            return (
+              <div
+                key={tmpl.id}
+                onClick={() => updateField('meta.templateLayout', tmpl.id)}
+                className={`p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 relative flex flex-col justify-between ${
+                  isSelected 
+                    ? 'border-amber-500 bg-stone-900 shadow-xl ring-2 ring-amber-500/20' 
+                    : 'border-stone-700 bg-stone-900/60 hover:border-stone-500'
+                }`}
+              >
+                <div className="space-y-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-800 text-amber-400 border border-stone-700 uppercase tracking-wider">
+                      {tmpl.badge}
+                    </span>
+                    {isSelected && (
+                      <span className="w-5 h-5 rounded-full bg-amber-500 text-stone-900 flex items-center justify-center">
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                      </span>
+                    )}
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-white text-sm">{tmpl.name}</h4>
+                    <p className="text-[11px] text-amber-400/90 font-medium">{tmpl.subtitle}</p>
+                  </div>
+
+                  <p className="text-xs text-stone-400 leading-relaxed">
+                    {tmpl.description}
+                  </p>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-stone-800/80 flex items-center justify-between text-[11px]">
+                  <span className="text-stone-400">Tag Bentuk:</span>
+                  <span className="font-semibold text-stone-200">{tmpl.tag}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 2. Theme Color Palette Selection */}
+      <div className="p-6 rounded-2xl bg-stone-800 border border-stone-700 space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-bold text-sm text-white flex items-center gap-2">
+              <Palette className="w-4 h-4 text-amber-500" />
+              <span>Pilihan Palet Warna Tema</span>
+            </h3>
+            <p className="text-xs text-stone-400 mt-0.5">
+              Pilihan kombinasi warna siap pakai. Warna ini akan diterapkan ke model layout di atas.
+            </p>
+          </div>
+          <span className="text-xs text-stone-400">6 Palet Warna</span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Object.entries(themes).map(([key, t]) => {
             const isSelected = activeThemeKey === key;
             return (
               <div
                 key={key}
-                onClick={() => updateField('meta.activeTheme', key)}
+                onClick={() => {
+                  updateField('meta.activeTheme', key);
+                  // Otomatis sinkronkan layout bawaan tema jika pengguna memilih palet
+                  if (t.layout) {
+                    updateField('meta.templateLayout', t.layout);
+                  }
+                }}
                 className={`p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 relative flex flex-col justify-between ${
                   isSelected 
                     ? 'border-amber-500 bg-stone-900 shadow-xl' 
@@ -155,12 +231,12 @@ export const ThemeMusicEditor = () => {
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-sm text-white">{t.name}</span>
                     {isSelected && (
-                      <span className="w-6 h-6 rounded-full bg-amber-500 text-stone-900 flex items-center justify-center">
-                        <Check className="w-4 h-4 stroke-[3]" />
+                      <span className="w-5 h-5 rounded-full bg-amber-500 text-stone-900 flex items-center justify-center">
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-stone-400 leading-relaxed">
+                  <p className="text-xs text-stone-400 leading-relaxed line-clamp-2">
                     {t.description}
                   </p>
                 </div>

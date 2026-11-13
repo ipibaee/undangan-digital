@@ -1,11 +1,14 @@
 import React from 'react';
 import { useInvitation } from '../../context/InvitationContext';
-import { MailOpen, Heart, Calendar } from 'lucide-react';
+import { MailOpen, Heart, Calendar, Crown, Sparkles } from 'lucide-react';
 import { CornerFlourish } from './Ornaments';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const CoverSplash = () => {
   const { data, currentTheme, guestName, openInvitation, isOpen } = useInvitation();
+  const layout = data.meta?.templateLayout || currentTheme.layout || 'punakawan';
+  const groomNick = data.couple?.groom?.nickName || 'Febri';
+  const brideNick = data.couple?.bride?.nickName || 'Ananta';
 
   return (
     <AnimatePresence>
@@ -24,34 +27,76 @@ export const CoverSplash = () => {
           />
           <div className={`absolute inset-0 ${currentTheme.coverOverlay} backdrop-blur-[2px]`} />
 
-          {/* Decorative Ornaments */}
-          <CornerFlourish position="top-left" className="top-4 left-4" color={data.meta.accentColor || '#bca88e'} />
-          <CornerFlourish position="top-right" className="top-4 right-4" color={data.meta.accentColor || '#bca88e'} />
-          <CornerFlourish position="bottom-left" className="bottom-4 left-4" color={data.meta.accentColor || '#bca88e'} />
-          <CornerFlourish position="bottom-right" className="bottom-4 right-4" color={data.meta.accentColor || '#bca88e'} />
+          {/* Layout-specific ambient borders */}
+          {layout === 'modern-arch' && (
+            <div className="absolute inset-4 sm:inset-8 rounded-t-[180px] rounded-b-3xl border border-white/20 pointer-events-none -z-0" />
+          )}
+
+          {layout === 'royal-luxury' && (
+            <div className="absolute inset-3 sm:inset-6 border-2 border-amber-400/30 rounded-3xl pointer-events-none -z-0 shadow-[inset_0_0_40px_rgba(212,175,55,0.15)]" />
+          )}
+
+          {/* Decorative Corner Ornaments (Classic / Punakawan) */}
+          {layout === 'punakawan' && (
+            <>
+              <CornerFlourish position="top-left" className="top-4 left-4" color={data.meta.accentColor || '#bca88e'} />
+              <CornerFlourish position="top-right" className="top-4 right-4" color={data.meta.accentColor || '#bca88e'} />
+              <CornerFlourish position="bottom-left" className="bottom-4 left-4" color={data.meta.accentColor || '#bca88e'} />
+              <CornerFlourish position="bottom-right" className="bottom-4 right-4" color={data.meta.accentColor || '#bca88e'} />
+            </>
+          )}
 
           {/* Main Cover Content */}
           <div className="relative z-20 flex flex-col items-center justify-between w-full max-w-md h-full py-12 px-6 text-center text-white">
             
             {/* Top Header */}
             <div className="animate-fade-in space-y-2 mt-4">
-              <p className="font-cinzel text-xs md:text-sm tracking-[0.3em] uppercase text-stone-200">
-                The Wedding Of
-              </p>
-              <div className="w-16 h-[1px] bg-stone-300/40 mx-auto" />
+              {layout === 'royal-luxury' ? (
+                <div className="space-y-1">
+                  <Crown className="w-6 h-6 text-amber-300 mx-auto animate-pulse" />
+                  <p className="font-cinzel text-xs tracking-[0.35em] uppercase text-amber-200/90 font-bold">
+                    Royal Wedding Invitation
+                  </p>
+                </div>
+              ) : layout === 'modern-arch' ? (
+                <div className="space-y-1">
+                  <span className="inline-block px-3 py-1 rounded-full text-[10px] tracking-[0.25em] uppercase font-bold bg-white/10 backdrop-blur-md text-stone-200 border border-white/20">
+                    WEDDING CELEBRATION
+                  </span>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="font-cinzel text-xs md:text-sm tracking-[0.3em] uppercase text-stone-200">
+                    The Wedding Of
+                  </p>
+                  <div className="w-16 h-[1px] bg-stone-300/40 mx-auto" />
+                </div>
+              )}
             </div>
 
             {/* Couple Calligraphy Names */}
             <div className="my-auto space-y-4">
-              <h1 className="font-romantic text-6xl sm:text-7xl md:text-8xl text-white drop-shadow-md leading-tight tracking-wide">
-                {data.couple.groom.nickName}
-                <span className="font-script text-4xl sm:text-5xl text-amber-200/90 block sm:inline my-1 sm:my-0 sm:mx-3">&</span>
-                {data.couple.bride.nickName}
-              </h1>
+              {layout === 'modern-arch' ? (
+                <h1 className="font-serif-heading text-5xl sm:text-6xl md:text-7xl text-white drop-shadow-md leading-tight tracking-wide font-light">
+                  {groomNick} <span className="italic font-normal text-amber-200/90 block sm:inline my-1 sm:my-0">&</span> {brideNick}
+                </h1>
+              ) : layout === 'royal-luxury' ? (
+                <h1 className="font-romantic text-6xl sm:text-7xl md:text-8xl bg-gradient-to-r from-amber-100 via-yellow-200 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] leading-tight tracking-wide">
+                  {groomNick}
+                  <span className="font-script text-4xl sm:text-5xl text-amber-300 block sm:inline my-1 sm:my-0 sm:mx-3">&</span>
+                  {brideNick}
+                </h1>
+              ) : (
+                <h1 className="font-romantic text-6xl sm:text-7xl md:text-8xl text-white drop-shadow-md leading-tight tracking-wide">
+                  {groomNick}
+                  <span className="font-script text-4xl sm:text-5xl text-amber-200/90 block sm:inline my-1 sm:my-0 sm:mx-3">&</span>
+                  {brideNick}
+                </h1>
+              )}
 
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-xs sm:text-sm font-medium tracking-wider text-stone-200">
                 <Calendar className="w-3.5 h-3.5 text-amber-300" />
-                <span>{data.events.akad.date}</span>
+                <span>{data.events?.akad?.date || 'Harmoni Kasih'}</span>
               </div>
             </div>
 
@@ -72,7 +117,7 @@ export const CoverSplash = () => {
               {/* Open Invitation Button */}
               <button
                 onClick={openInvitation}
-                className={`w-full py-3.5 px-6 rounded-xl font-medium tracking-wide flex items-center justify-center gap-2.5 shadow-xl transition-all duration-300 transform active:scale-95 group cursor-pointer ${currentTheme.primaryBtn}`}
+                className={`w-full py-3.5 px-6 rounded-2xl font-medium tracking-wide flex items-center justify-center gap-2.5 shadow-xl transition-all duration-300 transform active:scale-95 group cursor-pointer ${currentTheme.primaryBtn}`}
               >
                 <MailOpen className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
                 <span className="text-sm font-semibold tracking-wider uppercase">Buka Undangan</span>
