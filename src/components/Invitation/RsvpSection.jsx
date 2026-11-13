@@ -111,86 +111,61 @@ export const RsvpSection = () => {
               </div>
             </div>
 
-            {/* Relation & Attendance Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">
-                  Hubungan
-                </label>
-                <select
-                  value={form.relation}
-                  onChange={(e) => setForm({ ...form, relation: e.target.value })}
-                  className="w-full px-3 py-2.5 rounded-xl border border-stone-300 text-sm bg-white/80 focus:outline-none focus:ring-2 focus:ring-stone-400 text-stone-800"
+            {/* Konfirmasi Kehadiran: Tombol Hadir & Tidak Hadir */}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2">
+                Konfirmasi Kehadiran ?
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, attendance: 'hadir' })}
+                  className={`py-2.5 px-3 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
+                    form.attendance === 'hadir'
+                      ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-sm ring-2 ring-emerald-500/30'
+                      : 'bg-white border-stone-300 text-stone-600 hover:bg-stone-50'
+                  }`}
                 >
-                  <option value="Keluarga">Keluarga</option>
-                  <option value="Sahabat">Sahabat</option>
-                  <option value="Rekan Kerja">Rekan Kerja</option>
-                  <option value="Teman Sekolah / Kuliah">Teman Sekolah / Kuliah</option>
-                  <option value="Tetangga">Tetangga</option>
-                  <option value="Tamu Undangan">Tamu Undangan</option>
-                </select>
-              </div>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>Hadir</span>
+                </button>
 
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">
-                  Konfirmasi Kehadiran
-                </label>
-                <select
-                  value={form.attendance}
-                  onChange={(e) => setForm({ ...form, attendance: e.target.value })}
-                  className="w-full px-3 py-2.5 rounded-xl border border-stone-300 text-sm bg-white/80 focus:outline-none focus:ring-2 focus:ring-stone-400 text-stone-800"
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, attendance: 'tidak_hadir' })}
+                  className={`py-2.5 px-3 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
+                    form.attendance === 'tidak_hadir'
+                      ? 'bg-rose-50 border-rose-500 text-rose-700 shadow-sm ring-2 ring-rose-500/30'
+                      : 'bg-white border-stone-300 text-stone-600 hover:bg-stone-50'
+                  }`}
                 >
-                  <option value="hadir">Ya, Saya Hadir</option>
-                  <option value="ragu">Masih Ragu</option>
-                  <option value="tidak_hadir">Maaf, Tidak Bisa Hadir</option>
-                </select>
+                  <XCircle className="w-4 h-4 text-rose-600" />
+                  <span>Tidak Hadir</span>
+                </button>
               </div>
             </div>
-
-            {/* Pax Count if Hadir */}
-            {form.attendance === 'hadir' && (
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">
-                  Jumlah Tamu Yang Hadir
-                </label>
-                <div className="relative">
-                  <Users className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <select
-                    value={form.pax}
-                    onChange={(e) => setForm({ ...form, pax: e.target.value })}
-                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-stone-300 text-sm bg-white/80 focus:outline-none focus:ring-2 focus:ring-stone-400 text-stone-800"
-                  >
-                    <option value="1">1 Orang</option>
-                    <option value="2">2 Orang</option>
-                    <option value="3">3 Orang</option>
-                    <option value="4">4+ Orang (Keluarga)</option>
-                  </select>
-                </div>
-              </div>
-            )}
 
             {/* Message Input */}
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">
-                Ucapan & Doa Restu
+                Berikan Ucapan & Do'a
               </label>
               <textarea
                 required
-                rows={3}
-                placeholder="Tuliskan ucapan dan doa terbaik untuk kedua mempelai..."
+                rows={4}
+                placeholder="Tuliskan ucapan dan doa terbaik Anda untuk kedua mempelai..."
                 value={form.message}
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
-                className="w-full p-3 rounded-xl border border-stone-300 text-sm bg-white/80 focus:outline-none focus:ring-2 focus:ring-stone-400 text-stone-800 resize-none"
+                className="w-full p-3.5 rounded-2xl border border-stone-300 text-xs sm:text-sm bg-white/90 focus:outline-none focus:ring-2 focus:ring-[#8C533C] text-stone-800 leading-relaxed"
               />
             </div>
 
             {/* Submit Button */}
             <button
               type="submit"
-              className={`w-full py-3.5 px-6 rounded-xl font-semibold text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center gap-2 shadow-lg transition-all ${currentTheme.primaryBtn}`}
+              className="w-full py-3.5 px-6 rounded-full font-bold text-xs uppercase tracking-wider text-white bg-[#8C533C] hover:bg-[#72412E] shadow-md transition-all cursor-pointer"
             >
-              <Send className="w-4 h-4" />
-              <span>Kirim Ucapan & Konfirmasi</span>
+              Kirim
             </button>
 
             {submitted && (

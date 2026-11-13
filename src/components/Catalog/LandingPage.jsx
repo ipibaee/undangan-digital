@@ -144,13 +144,6 @@ export const LandingPage = ({ onSelectSlug, onOpenAdmin }) => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={onOpenAdmin}
-              className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-stone-300 text-stone-700 hover:bg-stone-100 transition-all flex items-center gap-1.5 cursor-pointer"
-            >
-              <Shield className="w-3.5 h-3.5 text-stone-500" />
-              <span>Login Admin</span>
-            </button>
             <a
               href="#katalog"
               className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-[#8C533C] hover:bg-[#72412E] text-white shadow-md shadow-amber-900/20 transition-all flex items-center gap-1.5 cursor-pointer"
@@ -208,29 +201,8 @@ export const LandingPage = ({ onSelectSlug, onOpenAdmin }) => {
             </div>
           </FadeIn>
 
-          {/* Cari Undangan Klien Input */}
-          <FadeIn direction="up" delay={0.4}>
-            <div className="pt-6 max-w-md mx-auto">
-              <form onSubmit={handleSearchSubmit} className="relative flex items-center">
-                <input
-                  type="text"
-                  placeholder="Ketik slug undangan klien (contoh: febri-ananta atau ipi-seli)..."
-                  value={searchSlug}
-                  onChange={(e) => setSearchSlug(e.target.value)}
-                  className="w-full pl-4 pr-24 py-3 rounded-2xl border border-stone-300 bg-white/90 shadow-sm text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#8C533C] text-stone-800"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-1.5 px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold tracking-wide transition-all cursor-pointer"
-                >
-                  Buka
-                </button>
-              </form>
-            </div>
-          </FadeIn>
-
           {/* Social Proof Badges */}
-          <FadeIn direction="up" delay={0.5}>
+          <FadeIn direction="up" delay={0.4}>
             <div className="pt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-stone-500 font-medium">
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
@@ -539,9 +511,6 @@ export const LandingPage = ({ onSelectSlug, onOpenAdmin }) => {
           <div className="flex items-center gap-6">
             <a href="#katalog" className="hover:text-white transition-colors">Katalog Tema</a>
             <a href="#harga" className="hover:text-white transition-colors">Harga</a>
-            <button onClick={onOpenAdmin} className="text-amber-400 hover:text-amber-300 transition-colors cursor-pointer">
-              Panel Pengelola
-            </button>
           </div>
         </div>
 
